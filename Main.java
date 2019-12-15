@@ -1,7 +1,9 @@
 import javafx.application.Application; 
 import javafx.scene.Scene;
 import javafx.scene.text.*;
-import javafx.scene.control.*; 
+import javafx.scene.image.*;
+import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.*; 
 import javafx.event.ActionEvent; 
 import javafx.event.EventHandler; 
@@ -10,6 +12,7 @@ import javafx.stage.Stage;
 import javafx.collections.*;
 
 import mutabletypes.*;
+import utilities.julia;
 
 /*inputs to make
    c value (only have julia set)
@@ -26,11 +29,13 @@ import mutabletypes.*;
 public class Main extends Application {
 
    MutableDouble darkness = new MutableDouble(40);
-   MutableDouble xView= new MutableDouble(2);
-   MutableDouble yView= new MutableDouble(2);
+   MutableDouble xView= new MutableDouble(4);
+   MutableDouble yView= new MutableDouble(4);
    MutableDouble expansion = new MutableDouble(1);
    MutableDouble cVal = new MutableDouble(0.5);
-   String formula = ""; //could end up doing other data type
+   final int imgWidth = 400;
+   julia currentJulia;
+   //String formula = ""; //could end up doing other data type
 
 
    @Override     
@@ -38,17 +43,63 @@ public class Main extends Application {
       Pane root = new Pane();
       initWindow(root);
 
-      Scene scene = new Scene(root ,1200, 600);
+      //julia fractal = new julia(12);
+      //setImage(fractal.getImage(), root, 400, 200);
+      
+
+      Scene scene = new Scene(root ,1000, 600);
+
+      scene.setOnKeyPressed(e -> {
+         if (e.getCode() == KeyCode.ENTER) {
+            makeFractal(root);
+         }
+      });
+
       primaryStage.setTitle("Fractals"); 
       primaryStage.setScene(scene); 
-      primaryStage.show(); 
+      primaryStage.show();
+
    }
 
-   private Button makeButton(String text, int xpos, int ypos, Pane root){
+   private void setImage(WritableImage image, Pane root, int xpos, int ypos){
+      ImageView viewer = new ImageView(image);
+      viewer.relocate(xpos, ypos);
+      root.getChildren().add(viewer);
+   }
+
+   private void saveImage(){
+      
+   }
+
+   private void makeFractal(Pane root){
+      julia jfractal = new julia(imgWidth, cVal.get(), expansion.get(), darkness.get(), xView.get(), yView.get());
+      setImage(jfractal.getImage(), root, 400, 50);
+   }
+
+   private Button makeFractalButton(String text, int xpos, int ypos, Pane root){
       Button newButt = new Button(text);
       newButt.relocate(xpos, ypos);
-      //root.getChildren().add(newButt);
+      EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() { 
+         public void handle(ActionEvent e) 
+         { 
+            makeFractal(root);
+         } 
+      };
+      newButt.addEventHandler(ActionEvent.ACTION,event);
       return newButt;
+   }
+
+   private void makeSaveButton(String text, int xpos, int ypos, Pane root){
+      Button newButt = new Button(text);
+      newButt.relocate(xpos, ypos);
+      EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() { 
+         public void handle(ActionEvent e) 
+         { 
+            saveImage();
+         } 
+      };
+      newButt.addEventHandler(ActionEvent.ACTION,event);
+      root.getChildren().add(newButt);
    }
 
    private void initWindow(Pane root){
@@ -59,35 +110,38 @@ public class Main extends Application {
 
       //getIntList(1, 5, 300, 200, root);
 
-      Button submit = makeButton("button", 300, 50, root);
+      Button submit = makeFractalButton("create", fromLeft, 400, root);
       makeText("c value", defaultTextSize, fromLeft, fromTop, root);
-      submit.addEventHandler(ActionEvent.ACTION, makeTextBoxDouble(3, fromLeft+80, fromTop, root, cVal));
+      submit.addEventHandler(ActionEvent.ACTION, makeTextBoxDouble(3, fromLeft+80, fromTop, root, cVal, "0.5"));
 
       fromTop += spacing;
       makeText("expansion", defaultTextSize, fromLeft, fromTop, root);
-      submit.addEventHandler(ActionEvent.ACTION,makeTextBoxDouble(3, fromLeft+100, fromTop, root, expansion));
+      submit.addEventHandler(ActionEvent.ACTION,makeTextBoxDouble(3, fromLeft+100, fromTop, root, expansion, "1"));
       
       fromTop += spacing;
       makeText("darkness", defaultTextSize, fromLeft, fromTop, root);
-      submit.addEventHandler(ActionEvent.ACTION,makeTextBoxDouble(3, fromLeft+90, fromTop, root, darkness));
+      submit.addEventHandler(ActionEvent.ACTION,makeTextBoxDouble(3, fromLeft+90, fromTop, root, darkness, "40"));
 
       fromTop += spacing;
       makeText("camera position", defaultTextSize, fromLeft, fromTop, root);
          fromTop += spacing;
          makeText("x", defaultTextSize, fromLeft+20, fromTop, root);
-         submit.addEventHandler(ActionEvent.ACTION,makeTextBoxDouble(3, fromLeft+40, fromTop, root, xView));
+         submit.addEventHandler(ActionEvent.ACTION,makeTextBoxDouble(3, fromLeft+40, fromTop, root, xView, "2"));
 
          fromTop += spacing;
          makeText("y", defaultTextSize, fromLeft+20, fromTop, root);
-         submit.addEventHandler(ActionEvent.ACTION,makeTextBoxDouble(3, fromLeft+40, fromTop, root, yView));
+         submit.addEventHandler(ActionEvent.ACTION,makeTextBoxDouble(3, fromLeft+40, fromTop, root, yView, "2"));
       
+      makeSaveButton("save", fromLeft+60, 400, root);
+
+
        
       //Creating a Scene by passing the group object, height and width
       root.getChildren().add(submit);
    }
 
-   private EventHandler<ActionEvent> makeTextBoxDouble(int length, int xpos, int ypos, Pane root, MutableDouble v){
-      TextField newField = new TextField();
+   private EventHandler<ActionEvent> makeTextBoxDouble(int length, int xpos, int ypos, Pane root, MutableDouble v, String init){
+      TextField newField = new TextField(init);
       newField.relocate(xpos, ypos);
       newField.setPrefColumnCount(length);
       root.getChildren().add(newField);
@@ -95,16 +149,22 @@ public class Main extends Application {
       EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() { 
          public void handle(ActionEvent e) 
          { 
-            String alx = newField.getText();
-            if(isNumber(alx))
-               v.set(Double.parseDouble(alx));
-            else
+            String textCont = newField.getText();
+            if(isNumber(textCont)){
+               v.set(Double.parseDouble(textCont));
+               //errorMsg("number was"+textCont);
+            }
+            else{
                newField.setText("error");
-            errorMsg(alx);
+               errorMsg("non number was"+textCont);
+            }
          } 
      };
+     //when enter pressed
+
      return event;
    }
+
    public void makeText(String text, int size, int xpos, int ypos, Pane root){
       Text newText = new Text(text);
       newText.setFont(new Font(size));
@@ -118,12 +178,9 @@ public class Main extends Application {
 
    private boolean isNumber(String str){
       try{
-         Double.parseDouble(str);}
-      catch(NullPointerException e){
-         return false;}
+         Double.parseDouble(str);return true;}
       catch(NumberFormatException e){
          return false;}
-      return true;
    }
    /*
    private ObservableList getIntList(int min, int max,int xpos, int ypos, Pane root){
@@ -139,6 +196,7 @@ public class Main extends Application {
       root.getChildren().add(dropDown);
       return options;
    }*/
+   
 
 
    public static void main(String args[]){          
