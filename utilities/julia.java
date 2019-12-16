@@ -71,17 +71,18 @@ public class julia{
         int i = 0;
         while(keepIterating(i, x, y)){
             xTemp = squareNum(x) - squareNum(y);
-            y = 2*x*y+c;
+            y = (2*x*y)+c;
             x = xTemp + x;
 
             x *= expansion;
             y *= expansion;
-            i+=1;
+            i++;
         }
-        double valTemp = Math.cos((double)i);
-        i = rangeScale(valTemp, 0, 255, 0, darkness);
+        //double valTemp = Math.sin((double)i);
+        //i = rangeScale(valTemp, 0, 255, 0, darkness);
+        i = rangeScale((double)i, 0, 255, 0, darkness);
         //System.out.println(i);
-        return new int[]{i,i,i};
+        return new int[]{0,i,i};
     }
 
     private boolean keepIterating(int i, double x, double y){
@@ -102,7 +103,7 @@ public class julia{
 
     private double rangeScaleDouble(double val, double Tmin, double Tmax, double Rmin, double Rmax){
         double temp = (val-Rmin)/(Rmax-Rmin);
-        return (temp*(Tmax-Tmin) + Tmin);
+        return (double)(temp*(Tmax-Tmin) + Tmin);
     }
 
 

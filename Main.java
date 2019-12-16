@@ -17,7 +17,6 @@ import java.io.File;
 import java.awt.image.RenderedImage;
 //import javax.imageio.ImageIO;
 
-import mutabletypes.*;
 import utilities.julia;
 
 /*inputs to make
@@ -34,13 +33,25 @@ import utilities.julia;
 
 public class Main extends Application {
 
-   MutableDouble darkness = new MutableDouble(40);
-   MutableDouble xView= new MutableDouble(1.2);
-   MutableDouble yView= new MutableDouble(1.2);
-   MutableDouble expansion = new MutableDouble(1);
-   MutableDouble cVal = new MutableDouble(0.4);
-   MutableString xFormula = new MutableString("x");
-   MutableString yFormula = new MutableString("y");
+   final int DARK = 0;
+   final int XVIEW = 1;
+   final int YVIEW = 2;
+   final int EXPAN = 3;
+   final int CVAL = 4;
+   final int XFORM = 5;
+   final int YFORM = 6;
+
+   TextField[] inpFields = new TextField[7];
+   /**
+    * 0 = darkness
+    * 1 = xView
+    * 2 = yView
+    * 3 = expansion
+    * 4 = cVal
+    * 5 = xFormula
+    * 6 = yFormula
+    */
+
    final int imgWidth = 400;
    julia currentJulia;
    //String formula = ""; //could end up doing other data type
@@ -89,9 +100,30 @@ public class Main extends Application {
 
    }
 
+      /**
+    * 0 = darkness
+    * 1 = xView
+    * 2 = yView
+    * 3 = expansion
+    * 4 = cVal
+    * 5 = xFormula
+    * 6 = yFormula
+    */
    private void makeFractal(Pane root){
-      currentJulia = new julia(imgWidth, cVal.get(), expansion.get(), darkness.get(), xView.get(), yView.get());
+      double[] fVals = getFields();
+      currentJulia = new julia(imgWidth, fVals[CVAL], fVals[EXPAN], fVals[DARK], fVals[XVIEW], fVals[YVIEW]);
       setImage(currentJulia.getImage(), root, 400, 50);
+   }
+
+   private double[] getFields(){
+      double[] doubleVals = new double[7];
+      for(int i = 0; i < 5; i++){
+         String jxl = inpFields[i].getText();
+         if(isNumber(jxl)){
+            doubleVals[i] = Double.parseDouble(jxl);
+         }
+      }
+      return doubleVals;
    }
 
    private Button makeFractalButton(String text, int xpos, int ypos, Pane root){
@@ -127,93 +159,51 @@ public class Main extends Application {
       final int fromLeft = 20;
       final int fromLeftInset = fromLeft+20;
 
-      //getIntList(1, 5, 300, 200, root);
-
       Button submit = makeFractalButton("create", fromLeft, 400, root);
       makeText("c value", defaultTextSize, fromLeft, fromTop, root);
-      submit.addEventHandler(ActionEvent.ACTION, makeTextBoxDouble(3, fromLeft+80, fromTop, root, cVal, "0.4"));
+      makeTextBox(3, fromLeft+80, fromTop, root, "0.4", CVAL);
 
       fromTop += spacing;
       makeText("expansion", defaultTextSize, fromLeft, fromTop, root);
-      submit.addEventHandler(ActionEvent.ACTION,makeTextBoxDouble(3, fromLeft+100, fromTop, root, expansion, "1"));
+      makeTextBox(3, fromLeft+100, fromTop, root, "1", EXPAN);
       
       fromTop += spacing;
       makeText("darkness", defaultTextSize, fromLeft, fromTop, root);
-      submit.addEventHandler(ActionEvent.ACTION,makeTextBoxDouble(3, fromLeft+90, fromTop, root, darkness, "40"));
+      makeTextBox(3, fromLeft+90, fromTop, root, "40", DARK);
 
       fromTop += spacing;
       makeText("camera position", defaultTextSize, fromLeft, fromTop, root);
          fromTop += spacing;
          makeText("x", defaultTextSize, fromLeftInset, fromTop, root);
-         submit.addEventHandler(ActionEvent.ACTION,makeTextBoxDouble(3, fromLeft+40, fromTop, root, xView, "1.2"));
+
+         makeTextBox(3, fromLeft+40, fromTop, root, "1.2", XVIEW);//xview
 
          fromTop += spacing;
          makeText("y", defaultTextSize, fromLeftInset, fromTop, root);
-         submit.addEventHandler(ActionEvent.ACTION,makeTextBoxDouble(3, fromLeft+40, fromTop, root, yView, "1.2"));
+         makeTextBox(3, fromLeft+40, fromTop, root, "1.2", YVIEW);
       
       fromTop += spacing + 20;
       makeText("custom modifications on x and y", defaultTextSize, fromLeft, fromTop, root);
          fromTop += spacing;
          makeText("x=", defaultTextSize, fromLeftInset, fromTop, root);
-         //submit.addEventHandler(ActionEvent.ACTION,makeTextBoxDouble(3, fromLeft+40, fromTop, root, yView, "x"));//XXX
+         makeTextBox(3, fromLeft+40, fromTop, root, "x", XFORM);
 
          fromTop += spacing;
          makeText("y=", defaultTextSize, fromLeftInset, fromTop, root);
+         makeTextBox(3, fromLeft+40, fromTop, root, "y", YFORM);
       //maybe add option for colours
       makeSaveButton("save", fromLeft+60, 400, root);
        
       root.getChildren().add(submit);
    }
 
-   private EventHandler<ActionEvent> makeTextBoxDouble(int length, int xpos, int ypos, Pane root, MutableDouble v, String init){
+   private void makeTextBox(int length, int xpos, int ypos, Pane root, String init, int index){
       TextField newField = new TextField(init);
       newField.relocate(xpos, ypos);
       newField.setPrefColumnCount(length);
       root.getChildren().add(newField);
-
-      EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() { 
-         public void handle(ActionEvent e) 
-         { 
-            String textCont = newField.getText();
-            if(isNumber(textCont)){
-               v.set(Double.parseDouble(textCont));
-               //errorMsg("number was"+textCont);
-            }
-            else{
-               newField.setText("error");
-               errorMsg("non number was"+textCont);
-            }
-         } 
-     };
-     //when enter pressed
-
-     return event;
+      inpFields[index] = newField;
    }
-
-   /*private EventHandler<ActionEvent> makeTextBoxString(int length, int xpos, int ypos, Pane root, MutableDouble v, String init){
-      TextField newField = new TextField(init);
-      newField.relocate(xpos, ypos);
-      newField.setPrefColumnCount(length);
-      root.getChildren().add(newField);
-
-      EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() { 
-         public void handle(ActionEvent e) 
-         { 
-            String textCont = newField.getText();
-            if(isNumber(textCont)){
-               v.set(Double.parseDouble(textCont));
-               //errorMsg("number was"+textCont);
-            }
-            else{
-               newField.setText("error");
-               errorMsg("non number was"+textCont);
-            }
-         } 
-     };
-     //when enter pressed
-
-     return event;
-   }*/
 
    public void makeText(String text, int size, int xpos, int ypos, Pane root){
       Text newText = new Text(text);
