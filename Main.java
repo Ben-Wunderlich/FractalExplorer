@@ -16,6 +16,9 @@ import javafx.embed.swing.SwingFXUtils;
 import java.io.File;
 import java.awt.image.RenderedImage;
 //import javax.imageio.ImageIO;
+import javafx.animation.*;
+import javafx.util.Duration;
+import javafx.scene.paint.Color;
 
 import utilities.julia;
 
@@ -42,6 +45,7 @@ public class Main extends Application {
    final int YFORM = 6;
 
    TextField[] inpFields = new TextField[7];
+   FadeTransition fracDone;
    /**
     * 0 = darkness
     * 1 = xView
@@ -112,7 +116,8 @@ public class Main extends Application {
    private void makeFractal(Pane root){
       double[] fVals = getFields();
       currentJulia = new julia(imgWidth, fVals[CVAL], fVals[EXPAN], fVals[DARK], fVals[XVIEW], fVals[YVIEW]);
-      setImage(currentJulia.getImage(), root, 400, 50);
+      setImage(currentJulia.getImage(), root, 400, 100);
+      fracDone.play();
    }
 
    private double[] getFields(){
@@ -193,6 +198,13 @@ public class Main extends Application {
          makeTextBox(3, fromLeft+40, fromTop, root, "y", YFORM);
       //maybe add option for colours
       makeSaveButton("save", fromLeft+60, 400, root);
+
+      Text finishedNotifier = makeText("fractal complete", 35, 400, 20, root);
+      finishedNotifier.setOpacity(0);
+      finishedNotifier.setFill(Color.RED); 
+      fracDone = new FadeTransition(Duration.millis(1200), finishedNotifier);
+      fracDone.setFromValue(1.0);
+      fracDone.setToValue(0);
        
       root.getChildren().add(submit);
    }
@@ -205,11 +217,12 @@ public class Main extends Application {
       inpFields[index] = newField;
    }
 
-   public void makeText(String text, int size, int xpos, int ypos, Pane root){
+   public Text makeText(String text, int size, int xpos, int ypos, Pane root){
       Text newText = new Text(text);
       newText.setFont(new Font(size));
       newText.relocate(xpos, ypos);
       root.getChildren().add(newText);
+      return newText;
    }
 
    private void errorMsg(String er){
