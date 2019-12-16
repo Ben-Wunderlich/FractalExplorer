@@ -202,7 +202,7 @@ public class Main extends Application {
       Text finishedNotifier = makeText("fractal complete", 35, 400, 20, root);
       finishedNotifier.setOpacity(0);
       finishedNotifier.setFill(Color.RED); 
-      fracDone = new FadeTransition(Duration.millis(1200), finishedNotifier);
+      fracDone = new FadeTransition(Duration.millis(1000), finishedNotifier);
       fracDone.setFromValue(1.0);
       fracDone.setToValue(0);
        

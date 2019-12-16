@@ -7,7 +7,7 @@ import javafx.scene.image.WritableImage;
 public class julia{
     WritableImage image;
     int width;
-    double c;
+    double cVal;
     double expansion;
     double darkness;
     double xView;
@@ -17,14 +17,14 @@ public class julia{
 
     public julia(int width, double c, double expand, double dark, double xView, double yView){
         this.width = width;
-        this.c = c;
+        this.cVal = c;
         this.expansion = expand;
         this.darkness = dark;
         this.xView = xView;
         this.yView = yView;
         image  = new WritableImage(width, width);
         makeFractal();
-        System.out.println(rangeScale(20, 0, 255, 5, 15));
+        //System.out.println(rangeScale(20, 0, 255, 5, 15));
     }
 
     public WritableImage getImage(){
@@ -54,12 +54,11 @@ public class julia{
 
     private int[] getPixel(double x, double y){
         double xTemp;
-
         int i = 0;
         while(keepIterating(i, x, y)){
             xTemp = squareNum(x) - squareNum(y);
-            y = (2*x*y)+c;
-            x = xTemp + x;
+            y = (2*x*y)+cVal;
+            x = xTemp + cVal;
 
             x *= expansion;
             y *= expansion;
