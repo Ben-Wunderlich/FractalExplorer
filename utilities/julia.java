@@ -1,11 +1,11 @@
 package utilities;
 
-import javafx.scene.paint.*;
+//import javafx.scene.paint.*;
 
-import java.lang.Math.*;
-import java.util.Arrays;
+import java.lang.Math;
+//import java.util.Arrays;
 
-import javafx.scene.image.*;
+//import javafx.scene.image.*;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 
@@ -53,8 +53,7 @@ public class julia{
             for(int j = 0; j< width; j++){
                 double currY = rangeScaleDouble((double)j, -yView, yView, 0, (double)width);
                 int[] pix = getPixel(currX,currY);
-                int argb = makeARGB(pix[0],pix[1],pix[2]);
-                writer.setArgb(i, j, argb);
+                writer.setArgb(i, j, makeARGB(pix[0],pix[1],pix[2]));
             }
         }
     }
@@ -79,13 +78,14 @@ public class julia{
             y *= expansion;
             i+=1;
         }
-        i = rangeScale(i, 0, 255, 0, darkness);
+        double valTemp = Math.cos((double)i);
+        i = rangeScale(valTemp, 0, 255, 0, darkness);
         //System.out.println(i);
         return new int[]{i,i,i};
     }
 
     private boolean keepIterating(int i, double x, double y){
-        if(i < darkness && (squareNum(x) + squareNum(y) < 4)){
+        if((i < darkness) && (squareNum(x) + squareNum(y) < 4)){
             return true;
         }
         return false;
