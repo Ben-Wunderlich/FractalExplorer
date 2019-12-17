@@ -20,8 +20,7 @@ import javafx.animation.*;
 import javafx.util.Duration;
 import javafx.scene.paint.Color;
 
-import utilities.julia;
-
+import utilities.*;
 /*inputs to make
    c value (only have julia set)
    xview
@@ -98,7 +97,7 @@ public class Main extends Application {
          RenderedImage renderedImage = SwingFXUtils.fromFXImage(image, null);
          ImageIO.write(renderedImage,"png",file);
       } catch (Exception e) {
-        errorMsg("THINGS HAVE GONE WRONG");
+        utils.errorMsg("THINGS HAVE GONE WRONG");
       }
 
 
@@ -115,7 +114,8 @@ public class Main extends Application {
     */
    private void makeFractal(Pane root){
       double[] fVals = getFields();
-      currentJulia = new julia(imgWidth, fVals[CVAL], fVals[EXPAN], fVals[DARK], fVals[XVIEW], fVals[YVIEW]);
+      currentJulia = new julia(imgWidth, fVals[CVAL], fVals[EXPAN], fVals[DARK],
+      fVals[XVIEW], fVals[YVIEW], inpFields[XFORM].getText(), inpFields[YFORM].getText());
       setImage(currentJulia.getImage(), root, 400, 100);
       fracDone.play();
    }
@@ -124,7 +124,7 @@ public class Main extends Application {
       double[] doubleVals = new double[7];
       for(int i = 0; i < 5; i++){
          String jxl = inpFields[i].getText();
-         if(isNumber(jxl)){
+         if(utils.isNumber(jxl)){
             doubleVals[i] = Double.parseDouble(jxl);
          }
       }
@@ -225,16 +225,6 @@ public class Main extends Application {
       return newText;
    }
 
-   private void errorMsg(String er){
-      System.out.println(er);
-   }
-
-   private boolean isNumber(String str){
-      try{
-         Double.parseDouble(str);return true;}
-      catch(NumberFormatException e){
-         return false;}
-   }
 
    /*
    private ObservableList getIntList(int min, int max,int xpos, int ypos, Pane root){

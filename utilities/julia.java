@@ -1,8 +1,9 @@
 package utilities;
 
-import java.lang.Math;
+//import java.lang.Math;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
+import utilities.formula;
 
 public class julia{
     WritableImage image;
@@ -12,16 +13,21 @@ public class julia{
     double darkness;
     double xView;
     double yView;
+    formula xEq;
+    formula yEq;
 
 
 
-    public julia(int width, double c, double expand, double dark, double xView, double yView){
+    public julia(int width, double c, double expand,
+     double dark, double xView, double yView, String xEq, String yEq){
         this.width = width;
         this.cVal = c;
         this.expansion = expand;
         this.darkness = dark;
         this.xView = xView;
         this.yView = yView;
+        //this.xEq = new formula(xEq);
+        //this.yEq = new formula(yEq);
         image  = new WritableImage(width, width);
         makeFractal();
         //System.out.println(rangeScale(20, 0, 255, 5, 15));
@@ -54,11 +60,20 @@ public class julia{
 
     private int[] getPixel(double x, double y){
         double xTemp;
+
+       // double xEqTemp;
+       // double yEqTemp;
+
         int i = 0;
         while(keepIterating(i, x, y)){
             xTemp = squareNum(x) - squareNum(y);
             y = (2*x*y)+cVal;
             x = xTemp + cVal;
+
+            //do user defined expression here
+            //xEqTemp = x;yEqTemp =y;
+            //x = xEq.doEquation(xEqTemp, yEqTemp);
+            //y = yEq.doEquation(xEqTemp, yEqTemp);
 
             x *= expansion;
             y *= expansion;
