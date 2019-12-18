@@ -14,13 +14,17 @@ import javax.imageio.ImageIO;
 import javafx.embed.swing.SwingFXUtils;
 //import java.lang.Object;
 import java.io.File;
+import java.io.IOException;
 import java.awt.image.RenderedImage;
 //import javax.imageio.ImageIO;
 import javafx.animation.*;
 import javafx.util.Duration;
 import javafx.scene.paint.Color;
-
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 import utilities.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 /*inputs to make
    c value (only have julia set)
    xview
@@ -40,10 +44,11 @@ public class Main extends Application {
    final int YVIEW = 2;
    final int EXPAN = 3;
    final int CVAL = 4;
-   final int XFORM = 5;
-   final int YFORM = 6;
+   final int WIDTH = 5;
+   final int XFORM = 6;
+   final int YFORM = 7;
 
-   TextField[] inpFields = new TextField[7];
+   TextField[] inpFields = new TextField[8];
    FadeTransition fracDone;
    /**
     * 0 = darkness
@@ -51,25 +56,24 @@ public class Main extends Application {
     * 2 = yView
     * 3 = expansion
     * 4 = cVal
-    * 5 = xFormula
-    * 6 = yFormula
+    * 5 = width
+    * 6 = xFormula
+    * 7 = yFormula
     */
 
-   final int imgWidth = 400;
+   int imgWidth = 400;
    julia currentJulia;
-   //String formula = ""; //could end up doing other data type
+   ImageView lastImage = null;
 
 
    @Override     
    public void start(Stage primaryStage) throws Exception {            
       Pane root = new Pane();
-      initWindow(root);
+      initWindow(root, primaryStage);
 
-      //julia fractal = new julia(12);
-      //setImage(fractal.getImage(), root, 400, 200);
-      
-
-      Scene scene = new Scene(root ,1000, 600);
+      ScrollPane sp = new ScrollPane();
+      sp.setContent(root);
+      Scene scene = new Scene(sp ,1000, 600);
 
       scene.setOnKeyPressed(e -> {
          if (e.getCode() == KeyCode.ENTER) {
@@ -84,23 +88,41 @@ public class Main extends Application {
    }
 
    private void setImage(WritableImage image, Pane root, int xpos, int ypos){
+      if(lastImage != null){root.getChildren().remove(lastImage);}
       ImageView viewer = new ImageView(image);
       viewer.relocate(xpos, ypos);
       root.getChildren().add(viewer);
+      lastImage = viewer;
    }
 
-   private void saveImage(){
+   private void saveImage(Stage primaryStage){
 
       try {
+         FileChooser fileChooser = new FileChooser();
+         fileChooser.getExtensionFilters().add(new ExtensionFilter("Image Files", "*.png"));
+         String path = getStorageDirec();
+         fileChooser.setInitialDirectory(new File(path));
+
+         fileChooser.setInitialFileName(utils.randFileName(20));
+
+         File newFile = fileChooser.showSaveDialog(primaryStage);
+         if(newFile == null){
+            return;}
+         //utils.errorMsg(fileName);
+      
          WritableImage image = currentJulia.getImage();
-         File file = new File("test.png");
+         File file = new File(newFile.getAbsolutePath());
          RenderedImage renderedImage = SwingFXUtils.fromFXImage(image, null);
          ImageIO.write(renderedImage,"png",file);
-      } catch (Exception e) {
+      } catch (IOException e) {
         utils.errorMsg("THINGS HAVE GONE WRONG");
       }
+   }
 
-
+   private String getStorageDirec(){
+      Path currentRelativePath = Paths.get("");
+      String s = currentRelativePath.toAbsolutePath().toString();
+      return s + "\\images";
    }
 
       /**
@@ -114,20 +136,22 @@ public class Main extends Application {
     */
    private void makeFractal(Pane root){
       double[] fVals = getFields();
-      currentJulia = new julia(imgWidth, fVals[CVAL], fVals[EXPAN], fVals[DARK],
+      currentJulia = new julia((int)fVals[WIDTH], fVals[CVAL], fVals[EXPAN], fVals[DARK],
       fVals[XVIEW], fVals[YVIEW], inpFields[XFORM].getText(), inpFields[YFORM].getText());
       setImage(currentJulia.getImage(), root, 400, 100);
       fracDone.play();
    }
 
    private double[] getFields(){
-      double[] doubleVals = new double[7];
+      double[] doubleVals = new double[6];
       for(int i = 0; i < 5; i++){
          String jxl = inpFields[i].getText();
          if(utils.isNumber(jxl)){
             doubleVals[i] = Double.parseDouble(jxl);
          }
       }
+      if(utils.isInt(inpFields[WIDTH].getText()))
+         doubleVals[WIDTH] = Double.parseDouble(inpFields[WIDTH].getText());
       return doubleVals;
    }
 
@@ -144,20 +168,20 @@ public class Main extends Application {
       return newButt;
    }
 
-   private void makeSaveButton(String text, int xpos, int ypos, Pane root){
+   private void makeSaveButton(String text, int xpos, int ypos, Pane root, Stage pStage){
       Button newButt = new Button(text);
       newButt.relocate(xpos, ypos);
       EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() { 
          public void handle(ActionEvent e) 
          {
-            saveImage();
+            saveImage(pStage);
          }
       };
       newButt.addEventHandler(ActionEvent.ACTION,event);
       root.getChildren().add(newButt);
    }
 
-   private void initWindow(Pane root){
+   private void initWindow(Pane root, Stage pStage){
       final int defaultTextSize = 20;
       final int spacing = 30;
       int fromTop = 50;
@@ -187,6 +211,11 @@ public class Main extends Application {
          makeText("y", defaultTextSize, fromLeftInset, fromTop, root);
          makeTextBox(3, fromLeft+40, fromTop, root, "1.2", YVIEW);
       
+      fromTop += spacing;
+      makeText("image width", defaultTextSize, fromLeft, fromTop, root);
+      makeTextBox(3, fromLeft+120, fromTop, root, "400", WIDTH);
+
+
       fromTop += spacing + 20;
       makeText("custom modifications on x and y", defaultTextSize, fromLeft, fromTop, root);
          fromTop += spacing;
@@ -197,7 +226,7 @@ public class Main extends Application {
          makeText("y=", defaultTextSize, fromLeftInset, fromTop, root);
          makeTextBox(3, fromLeft+40, fromTop, root, "y", YFORM);
       //maybe add option for colours
-      makeSaveButton("save", fromLeft+60, 400, root);
+      makeSaveButton("save", fromLeft+60, 400, root, pStage);
 
       Text finishedNotifier = makeText("fractal complete", 35, 400, 20, root);
       finishedNotifier.setOpacity(0);
