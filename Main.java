@@ -8,15 +8,11 @@ import javafx.scene.layout.*;
 import javafx.event.ActionEvent; 
 import javafx.event.EventHandler; 
 import javafx.stage.Stage; 
-//import javafx.collections.*;
-//import java.io.ByteArrayOutputStream;
 import javax.imageio.ImageIO;
 import javafx.embed.swing.SwingFXUtils;
-//import java.lang.Object;
 import java.io.File;
 import java.io.IOException;
 import java.awt.image.RenderedImage;
-//import javax.imageio.ImageIO;
 import javafx.animation.*;
 import javafx.util.Duration;
 import javafx.scene.paint.Color;
@@ -25,17 +21,9 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import utilities.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-/*inputs to make
-   c value (only have julia set)
-   xview
-   yview (have under view header)
-   darkness
-   expansion
+import java.lang.Thread;
+import javafx.application.Platform;
 
-   //box to get formula
-
-   button to create fractal
-*/
 
 public class Main extends Application {
 
@@ -50,6 +38,7 @@ public class Main extends Application {
 
    TextField[] inpFields = new TextField[8];
    FadeTransition fracDone;
+   Text loadingText;
    /**
     * 0 = darkness
     * 1 = xView
@@ -81,7 +70,8 @@ public class Main extends Application {
          }
       });
 
-      primaryStage.setTitle("Fractals"); 
+      primaryStage.setTitle("Fractals");
+      primaryStage.getIcons().add(new Image("file:icon.png"));
       primaryStage.setScene(scene); 
       primaryStage.show();
 
@@ -125,21 +115,19 @@ public class Main extends Application {
       return s + "\\images";
    }
 
-      /**
-    * 0 = darkness
-    * 1 = xView
-    * 2 = yView
-    * 3 = expansion
-    * 4 = cVal
-    * 5 = xFormula
-    * 6 = yFormula
-    */
    private void makeFractal(Pane root){
-      double[] fVals = getFields();
-      currentJulia = new julia((int)fVals[WIDTH], fVals[CVAL], fVals[EXPAN], fVals[DARK],
-      fVals[XVIEW], fVals[YVIEW], inpFields[XFORM].getText(), inpFields[YFORM].getText());
-      setImage(currentJulia.getImage(), root, 400, 100);
-      fracDone.play();
+      new Thread(() -> {
+         Platform.runLater(()-> loadingText.setOpacity(1));
+     
+         double[] fVals = getFields();
+
+         currentJulia = new julia((int)fVals[WIDTH], fVals[CVAL], fVals[EXPAN], fVals[DARK],
+         fVals[XVIEW], fVals[YVIEW], inpFields[XFORM].getText(), inpFields[YFORM].getText());
+
+         Platform.runLater(()-> loadingText.setOpacity(0));
+         Platform.runLater(()-> setImage(currentJulia.getImage(), root, 400, 100));
+         Platform.runLater(()-> fracDone.play());
+     }).start();
    }
 
    private double[] getFields(){
@@ -160,7 +148,7 @@ public class Main extends Application {
       newButt.relocate(xpos, ypos);
       EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() { 
          public void handle(ActionEvent e) 
-         { 
+         {
             makeFractal(root);
          } 
       };
@@ -205,11 +193,11 @@ public class Main extends Application {
          fromTop += spacing;
          makeText("x", defaultTextSize, fromLeftInset, fromTop, root);
 
-         makeTextBox(3, fromLeft+40, fromTop, root, "1.2", XVIEW);//xview
+         makeTextBox(3, fromLeft+40, fromTop, root, "2", XVIEW);//xview
 
          fromTop += spacing;
          makeText("y", defaultTextSize, fromLeftInset, fromTop, root);
-         makeTextBox(3, fromLeft+40, fromTop, root, "1.2", YVIEW);
+         makeTextBox(3, fromLeft+40, fromTop, root, "2", YVIEW);
       
       fromTop += spacing;
       makeText("image width", defaultTextSize, fromLeft, fromTop, root);
@@ -228,9 +216,14 @@ public class Main extends Application {
       //maybe add option for colours
       makeSaveButton("save", fromLeft+60, 400, root, pStage);
 
+      loadingText = makeText("loading...", 35, 400, 20, root);
+      loadingText.setOpacity(0);
+      loadingText.setFill(Color.LIMEGREEN);
+
+
       Text finishedNotifier = makeText("fractal complete", 35, 400, 20, root);
       finishedNotifier.setOpacity(0);
-      finishedNotifier.setFill(Color.RED); 
+      finishedNotifier.setFill(Color.BLUE); 
       fracDone = new FadeTransition(Duration.millis(1000), finishedNotifier);
       fracDone.setFromValue(1.0);
       fracDone.setToValue(0);

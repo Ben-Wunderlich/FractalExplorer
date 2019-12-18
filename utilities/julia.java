@@ -3,7 +3,7 @@ package utilities;
 //import java.lang.Math;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
-import utilities.formula;
+//import utilities.formula;
 
 public class julia{
     WritableImage image;
@@ -13,8 +13,8 @@ public class julia{
     double darkness;
     double xView;
     double yView;
-    formula xEq;
-    formula yEq;
+    //formula xEq;
+    //formula yEq;
 
 
 
