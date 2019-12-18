@@ -13,8 +13,8 @@ public class julia{
     double darkness;
     double xView;
     double yView;
-    //formula xEq;
-    //formula yEq;
+    formula xEq;
+    formula yEq;
 
 
 
@@ -26,8 +26,8 @@ public class julia{
         this.darkness = dark;
         this.xView = xView;
         this.yView = yView;
-        //this.xEq = new formula(xEq);
-        //this.yEq = new formula(yEq);
+        this.xEq = new formula(xEq);
+        this.yEq = new formula(yEq);
         image  = new WritableImage(width, width);
         makeFractal();
         //System.out.println(rangeScale(20, 0, 255, 5, 15));
@@ -61,8 +61,8 @@ public class julia{
     private int[] getPixel(double x, double y){
         double xTemp;
 
-       // double xEqTemp;
-       // double yEqTemp;
+        double xEqTemp;
+        double yEqTemp;
 
         int i = 0;
         while(keepIterating(i, x, y)){
@@ -71,9 +71,9 @@ public class julia{
             x = xTemp + cVal;
 
             //do user defined expression here
-            //xEqTemp = x;yEqTemp =y;
-            //x = xEq.doEquation(xEqTemp, yEqTemp);
-            //y = yEq.doEquation(xEqTemp, yEqTemp);
+            xEqTemp = x;yEqTemp =y;
+            x = xEq.doEquation(xEqTemp, yEqTemp);
+            y = yEq.doEquation(xEqTemp, yEqTemp);
 
             x *= expansion;
             y *= expansion;
