@@ -11,21 +11,25 @@ public class julia{
     double cVal;
     double expansion;
     double darkness;
-    double xView;
-    double yView;
+    double xMin;
+    double xMax;
+    double yMin;
+    double yMax;
     formula xEq;
     formula yEq;
 
 
 
-    public julia(int width, double c, double expand,
-     double dark, double xView, double yView, String xEq, String yEq){
+    public julia(int width, double c, double expand,double dark,
+    double xMin, double xMax, double yMin, double yMax, String xEq, String yEq){
         this.width = width;
         this.cVal = c;
         this.expansion = expand;
         this.darkness = dark;
-        this.xView = xView;
-        this.yView = yView;
+        this.xMin = xMin;
+        this.xMax = xMax;
+        this.yMin = yMin;
+        this.yMax = yMax;
         this.xEq = new formula(xEq);
         this.yEq = new formula(yEq);
         image  = new WritableImage(width, width);
@@ -44,9 +48,9 @@ public class julia{
         double currY;
 
         for(int i = 0; i<width; i++){
-            currX = rangeScale((double)i, -xView, xView, 0, (double)width);
+            currX = rangeScale((double)i, xMin, xMax, 0, (double)width);
             for(int j = 0; j< width; j++){
-                currY = rangeScale((double)j, -yView, yView, 0, (double)width);
+                currY = rangeScale((double)j, yMin, yMax, 0, (double)width);
                 int[] pix = getPixel(currX,currY);
                 writer.setArgb(i, j, makeARGB(pix[0],pix[1],pix[2]));
             }
