@@ -273,6 +273,9 @@ public class formula{
                 ////print("from sincos");
                 currOper.add(currChar);
             }
+            else{
+                throw new NumberFormatException("Invalid symbol");
+            }
         }
         if(!currNum.isEmpty()){
             tokenized.add(concat(currNum));

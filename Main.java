@@ -125,9 +125,9 @@ public class Main extends Application {
          Platform.runLater(()-> errorText.setOpacity(0));
          Platform.runLater(()-> loadingText.setOpacity(1));
      
-         double[] fVals = getFields();
          boolean wasError = false;
          try{
+         double[] fVals = getFields();
          currentJulia = new julia((int)fVals[WIDTH], fVals[CVAL], fVals[EXPAN], fVals[DARK],
          fVals[XVIEW], fVals[YVIEW], inpFields[XFORM].getText(), inpFields[YFORM].getText());
          }
@@ -141,7 +141,7 @@ public class Main extends Application {
             Platform.runLater(()-> fracDone.play());
          }
          else{
-            showError();
+            Platform.runLater(()-> showError());
          }
      }).start();
 
@@ -152,9 +152,7 @@ public class Main extends Application {
       double[] doubleVals = new double[6];
       for(int i = 0; i < 5; i++){
          String jxl = inpFields[i].getText();
-         if(utils.isNumber(jxl)){
             doubleVals[i] = Double.parseDouble(jxl);
-         }
       }
       if(utils.isInt(inpFields[WIDTH].getText()))
          doubleVals[WIDTH] = Double.parseDouble(inpFields[WIDTH].getText());
