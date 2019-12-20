@@ -5,12 +5,30 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
+
+import utilities.formulanodes.*;
+
 public class formula{
     private String[] postFix;
+    private Node head=null;
+    public Stack<Double> actionStack = new Stack<Double>();
+    public boolean noError = true;
     
+    /**
+     * make linked list with each node a type depending on operation
+     * have stack for saved values and also pass along with it x and y
+     * 
+     */
+
 
     public formula(String str){
-        makePostfix(str);//note that this can throw some mad exceptions
+        try{
+            makePostfix(str);//note that this can throw some mad exceptions
+            simulateEquation();
+        }
+        catch(Exception e){
+            noError = false;
+        }
     }
 
     private boolean isDualOperator(String str){
@@ -30,12 +48,6 @@ public class formula{
         return str.equals("sin") || str.equals("cos");
     }
 
-    private double toNum(String str, double x, double y){
-        if(str.equals("x")){return x;}
-        if(str.equals("y")){return y;}
-        return Double.parseDouble(str);
-    }
-
     private boolean isOperand(String str){
         if(isNumber(str)){
             return true;
@@ -43,10 +55,85 @@ public class formula{
         return str.equals("x") || str.equals("y");
     }
 
+    private void newNode(String operator, String a, String b){
+        double aStart=0;
+        double bStart=0;
+        int aVal=0;
+        int bVal=0;
+        Node nNode = new Node(null, null);
+
+        //System.out.println("recieved "+a+" " + operator+" "+b);
+
+        if(isNumber(a)){aStart=Double.parseDouble(a);}
+        else if(a.equals("x")){aVal=1;}
+        else if(a.equals("y")){aVal=2;}
+        else if(a.equals("a")){aVal=3;}
+        else{print("PANIC");}
+
+        if(b==null){}
+        else if(isNumber(b)){bStart=Double.parseDouble(b);}
+        else if(b.equals("x")){bVal=1;}
+        else if(b.equals("y")){bVal=2;}
+        else if(b.equals("a")){bVal=3;}
+        else{print("PANIC MOre");}
+
+        switch (operator) {
+            case "+":
+                //System.out.println("adding "+aStart+" "+bStart + " " + aVal + " "+ bVal);
+                nNode = new addNode(null, actionStack, aStart, bStart, aVal, bVal);
+                break;
+            case "-":
+                nNode = new subNode(null, actionStack, aStart, bStart, aVal, bVal);
+                break;
+            case "*":
+               // System.out.println("multing "+aStart+" "+bStart);
+                nNode = new multNode(null, actionStack, aStart, bStart, aVal, bVal);
+                break;
+            case "/":
+               // System.out.println("diving "+aStart+" "+bStart);
+                nNode = new divNode(null, actionStack, aStart, bStart, aVal, bVal);
+                break;
+            case "^":
+                nNode = new powNode(null, actionStack, aStart, bStart, aVal, bVal);
+                break;
+            case "sin":
+                nNode = new sinNode(null, actionStack, aStart, aVal);
+                break;
+            case "cos":
+                nNode = new cosNode(null, actionStack, aStart, aVal);
+                break;
+            default:
+                print("HEYYYYY, FREAK OUT");
+                break;
+        }
+        insertNode(nNode);
+    }
+
+    private void insertNode(Node newNode){
+        if(head == null){
+            head = newNode;   
+        }
+        else{
+            Node currNode = head;
+            while(currNode.next != null){
+                currNode = currNode.next;
+            }
+            currNode.next = newNode;
+        }
+    }
+
+
     public double doEquation(double x, double y){
-        Stack<Double> stack = new Stack<Double>();
-        double result;
-        double a;
+        head.doCalc(x, y);
+        //System.out.println(x+" "+y+" "+actionStack.peek());
+        return actionStack.pop();
+    }
+
+
+    public void simulateEquation(){
+        Stack<String> stack = new Stack<String>();
+        String a;
+        String start = postFix[0];
 
         String currStr;
         for(int i=0;i<postFix.length;i++){
@@ -54,22 +141,31 @@ public class formula{
             currStr = postFix[i];
             if(isDualOperator(currStr)){
                 a = stack.pop();
-                result = eval(currStr, stack.pop(), a);
-                stack.push(result);
+                //print("dual op made");
+                //System.out.println(currStr+ stack.peek()+ a);
+                //result = eval(currStr, stack.pop(), a);
+                newNode(currStr, stack.pop(), a);
+                stack.push("a");//is a placeholder
             }
             else if(isMonOperator(currStr)){
-                result = eval(currStr, stack.pop());
-                stack.push(result);
+                //result = eval(currStr, stack.pop());
+                newNode(currStr, stack.pop(), null);
+                //print("mono op made");
+                stack.push("a");
             }
             else if(isOperand(currStr)){
-                stack.push(toNum(currStr, x,y));
+                //stack.push(toNum(currStr, x,y));
+                stack.push(currStr);
             }
         }
-        //System.out.println("final result is"+stack.peek());
-        return stack.pop();
+        if(stack.pop().equals(start)){
+            //print("null stack made");
+            newNode("+", start, "0");
+        }//for if is just one char
     }
 
     public double eval(String operator, double a, double b){
+        //System.out.println(a+operator+b);
         switch (operator) {
             case "+":
                 return a+b;
@@ -83,14 +179,7 @@ public class formula{
                 try{return Math.pow(a,b);}
                 catch (Exception e) {return a;}
         };
-        print("SOMETHING HAS GONE HORRIBLY WRONG");
-        return 1;
-    }
-
-    public double eval(String operator, double a){
-        if(operator.equals("sin")){return Math.sin(a);}
-        if(operator.equals("cos")){return Math.cos(a);}
-        print("SOMETHING HAS GONE WRONG WITH SIN OR COS");
+        //print("SOMETHING HAS GONE HORRIBLY WRONG");
         return 1;
     }
 
@@ -167,7 +256,7 @@ public class formula{
         for(int i=0;i<str.length();i++){
             currChar = str.charAt(i);
             String currStr = String.valueOf(currChar);
-            if(isNumber(currStr)){
+            if(isNumber(currStr) || currStr.equals(".")){
                 currNum.add(currChar);}
             else if(isLoneSymbol(currChar)){
                 if(!currNum.isEmpty()){
@@ -181,7 +270,7 @@ public class formula{
                 tokenized.add(currStr);
             }
             else if(fromSinCos(currChar)){
-                //print("from sincos");
+                ////print("from sincos");
                 currOper.add(currChar);
             }
         }

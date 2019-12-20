@@ -39,6 +39,7 @@ public class Main extends Application {
    TextField[] inpFields = new TextField[8];
    FadeTransition fracDone;
    Text loadingText;
+   Text errorText;
    /**
     * 0 = darkness
     * 1 = xView
@@ -115,19 +116,36 @@ public class Main extends Application {
       return s + "\\images";
    }
 
+   private void showError(){
+      errorText.setOpacity(1);
+   }
+
    private void makeFractal(Pane root){
       new Thread(() -> {
+         Platform.runLater(()-> errorText.setOpacity(0));
          Platform.runLater(()-> loadingText.setOpacity(1));
      
          double[] fVals = getFields();
-
+         boolean wasError = false;
+         try{
          currentJulia = new julia((int)fVals[WIDTH], fVals[CVAL], fVals[EXPAN], fVals[DARK],
          fVals[XVIEW], fVals[YVIEW], inpFields[XFORM].getText(), inpFields[YFORM].getText());
+         }
+         catch(Exception e){
+            wasError = true;
+         }
 
          Platform.runLater(()-> loadingText.setOpacity(0));
-         Platform.runLater(()-> setImage(currentJulia.getImage(), root, 400, 100));
-         Platform.runLater(()-> fracDone.play());
+         if(!wasError){
+            Platform.runLater(()-> setImage(currentJulia.getImage(), root, 400, 100));
+            Platform.runLater(()-> fracDone.play());
+         }
+         else{
+            showError();
+         }
      }).start();
+
+     
    }
 
    private double[] getFields(){
@@ -219,6 +237,10 @@ public class Main extends Application {
       loadingText = makeText("loading...", 35, 400, 20, root);
       loadingText.setOpacity(0);
       loadingText.setFill(Color.LIMEGREEN);
+
+      errorText = makeText("oops, there was an error", 35, 400, 20, root);
+      errorText.setOpacity(0);
+      errorText.setFill(Color.RED);
 
 
       Text finishedNotifier = makeText("fractal complete", 35, 400, 20, root);
