@@ -74,7 +74,7 @@ public class Main extends Application {
       });
 
       primaryStage.setTitle("Fractals");
-      primaryStage.getIcons().add(new Image("file:icon.png"));
+      primaryStage.getIcons().add(new Image("file:utilities\\icon.png"));
       primaryStage.setScene(scene); 
       primaryStage.show();
 
@@ -276,6 +276,11 @@ public class Main extends Application {
    private void makeZoomButton(String text, int xpos, int ypos, Pane root, int what){
       Button newButt = new Button(text);
       newButt.relocate(xpos, ypos);
+      double buttSize = 45;
+      if(what <=3){
+         newButt.setMinSize(buttSize, buttSize);
+      }
+
       EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() { 
          public void handle(ActionEvent e) 
          {
@@ -334,7 +339,7 @@ public class Main extends Application {
       final int fromLeft = 20;
       final int fromLeftInset = fromLeft+20;
 
-      Button submit = makeFractalButton("create", fromLeft, 450, root);
+      Button submit = makeFractalButton("create", 260, 250, root);
       makeText("c value", defaultTextSize, fromLeft, fromTop, root);
       makeTextBox(3, fromLeft+80, fromTop, root, "0.4", CVAL);
 
@@ -382,18 +387,18 @@ public class Main extends Application {
          makeText("y=", defaultTextSize, fromLeftInset, fromTop, root);
          makeTextBox(3, fromLeft+40, fromTop, root, "y", YFORM);
       //maybe add option for colours
-      makeSaveButton("save", fromLeft+60, 450, root, pStage);
+      makeSaveButton("save", 320, 250, root, pStage);
 
       //field of view buttons
-      makeZoomButton("  up  ", 300, 200, root, 0);
-      makeZoomButton("right", 350, 230, root, 1);
-      makeZoomButton(" down", 300, 260, root, 2);
-      makeZoomButton(" left", 260, 230, root, 3);
+      makeZoomButton("up", 295, 25, root, 0);
+      makeZoomButton("right", 340, 70, root, 1);
+      makeZoomButton("down", 295, 115, root, 2);
+      makeZoomButton("left", 250, 70, root, 3);
 
-      makeZoomButton("zoom in ", 250, 300, root, 4);
-      makeZoomButton("zoom out", 320, 300, root, 5);
+      makeZoomButton("zoom in ", 250, 170, root, 4);
+      makeZoomButton("zoom out", 320, 170, root, 5);
 
-      goHomeButton("home", 290, 330, root);
+      goHomeButton("reset", 290, 200, root);
 
       loadingText = makeText("loading...", 35, 400, 20, root);
       loadingText.setOpacity(0);
