@@ -90,18 +90,20 @@ public class julia{
 
     private int[] colourify(int i){
         switch(colour){
-            case 0:
-                return new int[]{0,i,i};
             case 1:
-                return new int[]{i,i,i};
+                return new int[]{0,i,i};
             case 2:
-                return new int[]{255-i,255-i,255-i};
+                return new int[]{i,i,i};
             case 3:
-                return new int[]{i,0,i};
+                return new int[]{255-i,255-i,255-i};
             case 4:
-                return new int[]{0,255-i,0};
+                return new int[]{i,0,i};
             case 5:
-                return new int[]{i,i,0};       
+                return new int[]{0,255-i,0};
+            case 6:
+                return new int[]{i,i,0};
+            //case 7:
+                //return new int[]{0,0,i};  
             default:
                 return new int[]{0,i,i};
         }

@@ -143,8 +143,8 @@ public class Main extends Application {
 
    private void setColour(){
       Integer val = COLOUR.getValue();
-      if(val==null){julia.colour = 0;}
-      else{julia.colour = val-1;}
+      if(val==null){julia.colour = 1;}
+      else{julia.colour = val;}
    }
 
    private double[] getFields(){
@@ -356,22 +356,22 @@ public class Main extends Application {
       fromTop += spacing;
       makeText("camera position", defaultTextSize, fromLeft, fromTop, root);
          fromTop += spacing;
-         makeText("x", defaultTextSize, fromLeftInset, fromTop, root);
+         makeText("x", defaultTextSize-1, fromLeftInset, fromTop, root);
 
             fromTop += spacing;
-            makeText("from", defaultTextSize, fromLeftInset+10, fromTop, root);
+            makeText("from", defaultTextSize-2, fromLeftInset+10, fromTop, root);
             makeTextBox(3, fromLeftInset+60, fromTop, root, "-2", XMIN);
-            makeText("to", defaultTextSize, fromLeftInset+115, fromTop, root);
+            makeText("to", defaultTextSize-2, fromLeftInset+115, fromTop, root);
             makeTextBox(3, fromLeftInset+145, fromTop, root, "2", XMAX);
       
 
          fromTop += spacing;
-         makeText("y", defaultTextSize, fromLeftInset, fromTop, root);
+         makeText("y", defaultTextSize-1, fromLeftInset, fromTop, root);
 
             fromTop += spacing;
-            makeText("from", defaultTextSize, fromLeftInset+10, fromTop, root);
+            makeText("from", defaultTextSize-2, fromLeftInset+10, fromTop, root);
             makeTextBox(3, fromLeftInset+60, fromTop, root, "-2", YMIN);
-            makeText("to", defaultTextSize, fromLeftInset+115, fromTop, root);
+            makeText("to", defaultTextSize-2, fromLeftInset+115, fromTop, root);
             makeTextBox(3, fromLeftInset+145, fromTop, root, "2", YMAX);
       
       fromTop += spacing+10;
