@@ -1,10 +1,15 @@
 import javafx.application.Application; 
 import javafx.scene.Scene;
-import javafx.scene.text.*;
-import javafx.scene.image.*;
-import javafx.scene.control.*;
+import javafx.scene.text.Text;
+import javafx.scene.text.Font;
+import javafx.scene.image.WritableImage;
+import javafx.scene.image.ImageView;
+import javafx.scene.image.Image;
+import javafx.scene.control.TextField;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Button;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.*; 
+import javafx.scene.layout.Pane; 
 import javafx.event.ActionEvent; 
 import javafx.event.EventHandler; 
 import javafx.stage.Stage; 
@@ -13,7 +18,7 @@ import javafx.embed.swing.SwingFXUtils;
 import java.io.File;
 import java.io.IOException;
 import java.awt.image.RenderedImage;
-import javafx.animation.*;
+import javafx.animation.FadeTransition;
 import javafx.util.Duration;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
@@ -23,6 +28,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.lang.Thread;
 import javafx.application.Platform;
+import javafx.scene.control.Tooltip;
+
+import javafx.collections.ObservableList;
+import javafx.scene.control.ComboBox;
+import javafx.collections.FXCollections;
 
 
 public class Main extends Application {
@@ -39,6 +49,8 @@ public class Main extends Application {
    final int YFORM = 9;
 
    TextField[] inpFields = new TextField[10];
+
+   ComboBox<Integer> COLOUR;
    FadeTransition fracDone;
    Text loadingText;
    Text errorText;
@@ -56,29 +68,6 @@ public class Main extends Application {
    int imgWidth = 400;
    julia currentJulia;
    ImageView lastImage = null;
-
-
-   @Override     
-   public void start(Stage primaryStage) throws Exception {            
-      Pane root = new Pane();
-      initWindow(root, primaryStage);
-
-      ScrollPane sp = new ScrollPane();
-      sp.setContent(root);
-      Scene scene = new Scene(sp ,1000, 600);
-
-      scene.setOnKeyPressed(e -> {
-         if (e.getCode() == KeyCode.ENTER) {
-            makeFractal(root);
-         }
-      });
-
-      primaryStage.setTitle("Fractals");
-      primaryStage.getIcons().add(new Image("file:utilities\\icon.png"));
-      primaryStage.setScene(scene); 
-      primaryStage.show();
-
-   }
 
    private void setImage(WritableImage image, Pane root, int xpos, int ypos){
       if(lastImage != null){root.getChildren().remove(lastImage);}
@@ -126,6 +115,7 @@ public class Main extends Application {
       new Thread(() -> {
          Platform.runLater(()-> errorText.setOpacity(0));
          Platform.runLater(()-> loadingText.setOpacity(1));
+         Platform.runLater(()-> setColour());
      
          boolean wasError = false;
         try{
@@ -149,6 +139,12 @@ public class Main extends Application {
      }).start();
 
      
+   }
+
+   private void setColour(){
+      Integer val = COLOUR.getValue();
+      if(val==null){julia.colour = 0;}
+      else{julia.colour = val-1;}
    }
 
    private double[] getFields(){
@@ -340,6 +336,8 @@ public class Main extends Application {
       final int fromLeftInset = fromLeft+20;
 
       Button submit = makeFractalButton("create", 260, 250, root);
+      submit.setTooltip(new Tooltip("or press enter"));
+
       makeText("c value", defaultTextSize, fromLeft, fromTop, root);
       makeTextBox(3, fromLeft+80, fromTop, root, "0.4", CVAL);
 
@@ -350,6 +348,10 @@ public class Main extends Application {
       fromTop += spacing;
       makeText("darkness", defaultTextSize, fromLeft, fromTop, root);
       makeTextBox(3, fromLeft+90, fromTop, root, "40", DARK);
+
+      fromTop += spacing;
+      makeText("colour preset", defaultTextSize, fromLeft, fromTop, root);
+      COLOUR = makeIntList(1, 8, fromLeft+130, fromTop, root);
 
       fromTop += spacing;
       makeText("camera position", defaultTextSize, fromLeft, fromTop, root);
@@ -386,7 +388,11 @@ public class Main extends Application {
          fromTop += spacing;
          makeText("y=", defaultTextSize, fromLeftInset, fromTop, root);
          makeTextBox(3, fromLeft+40, fromTop, root, "y", YFORM);
-      //maybe add option for colours
+
+      fromTop += spacing+20;
+      String txt = "Valid symbols in custom functions are:\nx, y, (, ), +, -, *, /, ^, cos, sin";
+      makeText(txt, defaultTextSize-4, fromLeft, fromTop, root);
+
       makeSaveButton("save", 320, 250, root, pStage);
 
       //field of view buttons
@@ -435,22 +441,42 @@ public class Main extends Application {
       return newText;
    }
 
-
-   /*
-   private ObservableList getIntList(int min, int max,int xpos, int ypos, Pane root){
+   
+   private ComboBox<Integer> makeIntList(int min, int max,int xpos, int ypos, Pane root){
       ObservableList<Integer> options=FXCollections.observableArrayList();
       int i;
       for(i=min; i <= max; i++){
          options.add(i);
       }
-      ComboBox dropDown = new ComboBox(options);
+      ComboBox<Integer> dropDown = new ComboBox<Integer>(options);
 
       //TilePane tile_pane = new TilePane(combo_box); 
       dropDown.relocate(xpos, ypos);
       root.getChildren().add(dropDown);
-      return options;
-   }*/
-   
+      return dropDown;
+   }
+
+   @Override     
+   public void start(Stage primaryStage) throws Exception {            
+      Pane root = new Pane();
+      initWindow(root, primaryStage);
+
+      ScrollPane sp = new ScrollPane();
+      sp.setContent(root);
+      Scene scene = new Scene(sp ,1000, 600);
+
+      scene.setOnKeyPressed(e -> {
+         if (e.getCode() == KeyCode.ENTER) {
+            makeFractal(root);
+         }
+      });
+
+      primaryStage.setTitle("Fractals");
+      primaryStage.getIcons().add(new Image("file:utilities\\icon.png"));
+      primaryStage.setScene(scene); 
+      primaryStage.show();
+
+   }
 
 
    public static void main(String args[]){          

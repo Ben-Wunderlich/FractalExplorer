@@ -1,9 +1,7 @@
 package utilities;
 
-//import java.lang.Math;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
-//import utilities.formula;
 
 public class julia{
     WritableImage image;
@@ -17,6 +15,9 @@ public class julia{
     double yMax;
     formula xEq;
     formula yEq;
+
+
+    public static int colour=0;
 
 
 
@@ -58,7 +59,7 @@ public class julia{
 
     }
 
-    private int makeARGB(int r, int b, int g){
+    private int makeARGB(int r, int g, int b){
         return 255 << 24 | (r & 0xff) << 16 | (g & 0xff) << 8 | (b & 0xff);
     }
 
@@ -74,7 +75,7 @@ public class julia{
             y = (2*x*y)+cVal;
             x = xTemp + cVal;
 
-            //do user defined expression here
+            //user defined expression here
             xEqTemp = x;yEqTemp =y;
             x = xEq.doEquation(xEqTemp, yEqTemp);
             y = yEq.doEquation(xEqTemp, yEqTemp);
@@ -83,11 +84,27 @@ public class julia{
             y *= expansion;
             i++;
         }
-        //double valTemp = Math.sin((double)i);
-        //i = rangeScale(valTemp, 0, 255, 0, darkness);
         i = (int)rangeScale((double)i, 0, 255, 0, darkness);
-        //System.out.println(i);
-        return new int[]{0,i,i};
+        return colourify(i);
+    }
+
+    private int[] colourify(int i){
+        switch(colour){
+            case 0:
+                return new int[]{0,i,i};
+            case 1:
+                return new int[]{i,i,i};
+            case 2:
+                return new int[]{255-i,255-i,255-i};
+            case 3:
+                return new int[]{i,0,i};
+            case 4:
+                return new int[]{0,255-i,0};
+            case 5:
+                return new int[]{i,i,0};       
+            default:
+                return new int[]{0,i,i};
+        }
     }
 
     private boolean keepIterating(int i, double x, double y){
