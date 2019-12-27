@@ -347,6 +347,7 @@ public class Main extends Application {
       
       fromTop += spacing;
       makeText("darkness", defaultTextSize, fromLeft, fromTop, root);
+
       makeTextBox(3, fromLeft+90, fromTop, root, "40", DARK);
 
       fromTop += spacing;

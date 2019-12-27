@@ -103,7 +103,7 @@ public class julia{
             case 6:
                 return new int[]{i,i,0};
             //case 7:
-                //return new int[]{0,0,i};  
+               // return new int[]{0,0,0};  
             default:
                 return new int[]{0,i,i};
         }
