@@ -54,6 +54,8 @@ public class Main extends Application {
    FadeTransition fracDone;
    Text loadingText;
    Text errorText;
+
+   boolean busyLoading = false;
    /**
     * 0 = darkness
     * 1 = xView
@@ -112,11 +114,15 @@ public class Main extends Application {
    }
 
    private void makeFractal(Pane root){
+      if(busyLoading){
+         return;
+      }
+
       new Thread(() -> {
          Platform.runLater(()-> errorText.setOpacity(0));
          Platform.runLater(()-> loadingText.setOpacity(1));
          Platform.runLater(()-> setColour());
-     
+         busyLoading = true;
          boolean wasError = false;
         try{
          double[] fVals = getFields();
@@ -136,6 +142,7 @@ public class Main extends Application {
          else{
             Platform.runLater(()-> showError());
          }
+         busyLoading = false;
      }).start();
 
      
