@@ -6,6 +6,7 @@ import javafx.scene.image.WritableImage;
 public class julia{
     WritableImage image;
     int width;
+    int height;
     double cVal;
     double expansion;
     double darkness;
@@ -21,9 +22,10 @@ public class julia{
 
 
 
-    public julia(int width, double c, double expand,double dark,
+    public julia(int width, int height, double c, double expand,double dark,
     double xMin, double xMax, double yMin, double yMax, String xEq, String yEq){
         this.width = width;
+        this.height = height;
         this.cVal = c;
         this.expansion = expand;
         this.darkness = dark;
@@ -31,9 +33,11 @@ public class julia{
         this.xMax = xMax;
         this.yMin = yMin;
         this.yMax = yMax;
-        this.xEq = new formula(xEq);
-        this.yEq = new formula(yEq);
-        image  = new WritableImage(width, width);
+        String trimmedX = xEq.replaceAll("\\s+","");
+        this.xEq = new formula(trimmedX);
+        String trimmedY = yEq.replaceAll("\\s+","");
+        this.yEq = new formula(trimmedY);
+        image  = new WritableImage(width, height);
         makeFractal();
         //System.out.println(rangeScale(20, 0, 255, 5, 15));
     }
@@ -50,8 +54,8 @@ public class julia{
 
         for(int i = 0; i<width; i++){
             currX = rangeScale((double)i, xMin, xMax, 0, (double)width);
-            for(int j = 0; j< width; j++){
-                currY = rangeScale((double)j, yMin, yMax, 0, (double)width);
+            for(int j = 0; j< height; j++){
+                currY = rangeScale((double)j, yMin, yMax, 0, (double)height);
                 int[] pix = getPixel(currX,currY);
                 writer.setArgb(i, j, makeARGB(pix[0],pix[1],pix[2]));
             }

@@ -45,10 +45,11 @@ public class Main extends Application {
    final int EXPAN = 5;
    final int CVAL = 6;
    final int WIDTH = 7;
-   final int XFORM = 8;
-   final int YFORM = 9;
+   final int HEIGHT = 8;
+   final int XFORM = 9;//these 2 always need to be last
+   final int YFORM = 10;
 
-   TextField[] inpFields = new TextField[10];
+   TextField[] inpFields = new TextField[YFORM+1];
 
    ComboBox<Integer> COLOUR;
    FadeTransition fracDone;
@@ -56,16 +57,6 @@ public class Main extends Application {
    Text errorText;
 
    boolean busyLoading = false;
-   /**
-    * 0 = darkness
-    * 1 = xView
-    * 2 = yView
-    * 3 = expansion
-    * 4 = cVal
-    * 5 = width
-    * 6 = xFormula
-    * 7 = yFormula
-    */
 
    int imgWidth = 400;
    julia currentJulia;
@@ -126,11 +117,35 @@ public class Main extends Application {
          boolean wasError = false;
         try{
          double[] fVals = getFields();
-         currentJulia = new julia((int)fVals[WIDTH], fVals[CVAL], fVals[EXPAN],
+
+         int imgWidth = (int)fVals[WIDTH];
+         int imgHeight = (int)fVals[HEIGHT];
+         double ratio;
+         double diff;
+         double middle;
+         if(imgWidth > imgHeight){//hotdog
+            ratio = fVals[WIDTH] / fVals[HEIGHT];
+            diff = fVals[YMAX] - fVals[YMIN];
+            middle = (fVals[XMIN] + fVals[XMAX])/2;
+
+            fVals[XMIN] = middle - diff*ratio/2;
+            fVals[XMAX] = middle + diff*ratio/2;
+         }
+         else{//hamburger
+            ratio = fVals[HEIGHT]/fVals[WIDTH];
+            diff = fVals[XMAX] - fVals[XMIN];
+            middle = (fVals[YMIN] + fVals[YMAX])/2;
+
+            fVals[YMIN] = middle - diff*ratio/2;
+            fVals[YMAX] = middle + diff*ratio/2;
+         }
+
+         currentJulia = new julia(imgWidth, imgHeight, fVals[CVAL], fVals[EXPAN],
          fVals[DARK],fVals[XMIN], fVals[XMAX], fVals[YMIN], fVals[YMAX],
          inpFields[XFORM].getText(), inpFields[YFORM].getText());
          }
          catch(Exception e){
+            System.out.println(e);
             wasError = true;
          }
 
@@ -155,8 +170,8 @@ public class Main extends Application {
    }
 
    private double[] getFields(){
-      double[] doubleVals = new double[8];
-      for(int i = 0; i < 8; i++){
+      double[] doubleVals = new double[XFORM];
+      for(int i = 0; i < XFORM; i++){
          String jxl = inpFields[i].getText();
             doubleVals[i] = Double.parseDouble(jxl);
       }
@@ -164,8 +179,8 @@ public class Main extends Application {
          throw new NumberFormatException();
       }
 
-      if(utils.isInt(inpFields[WIDTH].getText()))
-         doubleVals[WIDTH] = Double.parseDouble(inpFields[WIDTH].getText());
+      //if(utils.isInt(inpFields[WIDTH].getText()))
+      //  doubleVals[WIDTH] = Double.parseDouble(inpFields[WIDTH].getText());
       return doubleVals;
    }
 
@@ -192,6 +207,7 @@ public class Main extends Application {
          yMax = allVals[YMAX];
       }
       catch(Exception e){
+         System.out.println(e);
          showError();return;
       }
       double shiftDist;
@@ -383,19 +399,24 @@ public class Main extends Application {
             makeTextBox(3, fromLeftInset+145, fromTop, root, "2", YMAX);
       
       fromTop += spacing+10;
-      makeText("image width", defaultTextSize, fromLeft, fromTop, root);
-      makeTextBox(3, fromLeft+120, fromTop, root, "400", WIDTH);
+      makeText("image dimensions", defaultTextSize, fromLeft, fromTop, root);
+         fromTop += spacing;
+         makeText("width", defaultTextSize-1, fromLeftInset, fromTop, root);
+         makeTextBox(3, fromLeftInset+60, fromTop, root, "400", WIDTH);
 
+         fromTop += spacing;
+         makeText("height", defaultTextSize-1, fromLeftInset, fromTop, root);
+         makeTextBox(3, fromLeftInset+60, fromTop, root, "400", HEIGHT);
 
       fromTop += spacing + 20;
       makeText("custom modifications on x and y", defaultTextSize, fromLeft, fromTop, root);
          fromTop += spacing;
-         makeText("x=", defaultTextSize, fromLeftInset, fromTop, root);
-         makeTextBox(3, fromLeft+40, fromTop, root, "x", XFORM);
+         makeText("x =", defaultTextSize, fromLeftInset, fromTop, root);
+         makeTextBox(15, fromLeft+60, fromTop, root, "x", XFORM);
 
          fromTop += spacing;
-         makeText("y=", defaultTextSize, fromLeftInset, fromTop, root);
-         makeTextBox(3, fromLeft+40, fromTop, root, "y", YFORM);
+         makeText("y =", defaultTextSize, fromLeftInset, fromTop, root);
+         makeTextBox(15, fromLeft+60, fromTop, root, "y", YFORM);
 
       fromTop += spacing+20;
       String txt = "Valid symbols in custom functions are:\nx, y, (, ), +, -, *, /, ^, cos, sin";
