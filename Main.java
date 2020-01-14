@@ -121,23 +121,23 @@ public class Main extends Application {
          int imgWidth = (int)fVals[WIDTH];
          int imgHeight = (int)fVals[HEIGHT];
          double ratio;
-         double diff;
+         double addend;
          double middle;
          if(imgWidth > imgHeight){//hotdog
             ratio = fVals[WIDTH] / fVals[HEIGHT];
-            diff = fVals[YMAX] - fVals[YMIN];
+            addend = (fVals[YMAX] - fVals[YMIN])*ratio/2;
             middle = (fVals[XMIN] + fVals[XMAX])/2;
 
-            fVals[XMIN] = middle - diff*ratio/2;
-            fVals[XMAX] = middle + diff*ratio/2;
+            fVals[XMIN] = middle - addend;
+            fVals[XMAX] = middle + addend;
          }
          else{//hamburger
             ratio = fVals[HEIGHT]/fVals[WIDTH];
-            diff = fVals[XMAX] - fVals[XMIN];
+            addend = (fVals[XMAX] - fVals[XMIN])*ratio/2;
             middle = (fVals[YMIN] + fVals[YMAX])/2;
 
-            fVals[YMIN] = middle - diff*ratio/2;
-            fVals[YMAX] = middle + diff*ratio/2;
+            fVals[YMIN] = middle - addend;
+            fVals[YMAX] = middle + addend;
          }
 
          currentJulia = new julia(imgWidth, imgHeight, fVals[CVAL], fVals[EXPAN],
@@ -145,7 +145,7 @@ public class Main extends Application {
          inpFields[XFORM].getText(), inpFields[YFORM].getText());
          }
          catch(Exception e){
-            System.out.println(e);
+            //System.out.println(e);
             wasError = true;
          }
 
@@ -207,7 +207,7 @@ public class Main extends Application {
          yMax = allVals[YMAX];
       }
       catch(Exception e){
-         System.out.println(e);
+         //System.out.println(e);
          showError();return;
       }
       double shiftDist;
@@ -419,7 +419,7 @@ public class Main extends Application {
          makeTextBox(15, fromLeft+60, fromTop, root, "y", YFORM);
 
       fromTop += spacing+20;
-      String txt = "Valid symbols in custom functions are:\nx, y, (, ), +, -, *, /, ^, cos, sin";
+      String txt = "Valid symbols in custom functions are:\nnumbers, x, y, (, ), +, -, *, /, ^, cos, sin";
       makeText(txt, defaultTextSize-4, fromLeft, fromTop, root);
 
       makeSaveButton("save", 320, 250, root, pStage);

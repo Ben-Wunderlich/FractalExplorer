@@ -33,6 +33,7 @@ public class julia{
         this.xMax = xMax;
         this.yMin = yMin;
         this.yMax = yMax;
+        
         String trimmedX = xEq.replaceAll("\\s+","");
         this.xEq = new formula(trimmedX);
         String trimmedY = yEq.replaceAll("\\s+","");
