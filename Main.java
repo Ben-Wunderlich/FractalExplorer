@@ -94,7 +94,7 @@ public class Main extends Application {
    }
 
    private boolean imageToSave(){
-      return false;//XXX
+      return lastImage != null;
    }
 
    private void saveImage(Stage primaryStage){
@@ -142,7 +142,7 @@ public class Main extends Application {
          else{
             return null;
          }
-       } catch (FileNotFoundException e) {
+       } catch (Exception e) {
          //e.printStackTrace();
          return null;
        }
@@ -534,6 +534,7 @@ public class Main extends Application {
                try {
                   Desktop.getDesktop().browse(new URI(linkedFile));
                } catch (IOException e1) {
+
                   e1.printStackTrace();
                } catch (URISyntaxException e1) {
                   e1.printStackTrace();
