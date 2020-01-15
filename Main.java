@@ -29,6 +29,14 @@ import java.nio.file.Paths;
 import java.lang.Thread;
 import javafx.application.Platform;
 import javafx.scene.control.Tooltip;
+import javafx.scene.control.Hyperlink;
+import java.awt.Desktop;
+import java.net.URISyntaxException;
+import java.net.URI;
+import javafx.scene.Node;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
+import java.io.FileWriter;
 
 import javafx.collections.ObservableList;
 import javafx.scene.control.ComboBox;
@@ -49,6 +57,7 @@ public class Main extends Application {
    final int XFORM = 9;//these 2 always need to be last
    final int YFORM = 10;
 
+   final String saveFilePath = "utilities\\save.pathstorage";
    TextField[] inpFields = new TextField[YFORM+1];
 
    ComboBox<Integer> COLOUR;
@@ -70,20 +79,44 @@ public class Main extends Application {
       lastImage = viewer;
    }
 
+   private void savePath(File fullFile){
+      utils.errorMsg("path saved!");
+      String fullPath = fullFile.getParentFile().getAbsolutePath();
+      try{
+         FileWriter myWriter = new FileWriter(saveFilePath);
+         myWriter.write(fullPath);
+         myWriter.close();
+      }
+      catch(IOException e){
+         return;
+      }
+      System.out.println(fullPath);
+   }
+
+   private boolean imageToSave(){
+      return false;//XXX
+   }
+
    private void saveImage(Stage primaryStage){
 
       try {
+         if(!imageToSave()){
+            showError("Image must be made before saved");
+            return;
+         }
          FileChooser fileChooser = new FileChooser();
          fileChooser.getExtensionFilters().add(new ExtensionFilter("Image Files", "*.png"));
          String path = getStorageDirec();
          fileChooser.setInitialDirectory(new File(path));
 
-         fileChooser.setInitialFileName(utils.randFileName(20));
+         fileChooser.setInitialFileName(utils.randFileName(10));
 
          File newFile = fileChooser.showSaveDialog(primaryStage);
          if(newFile == null){
             return;}
          //utils.errorMsg(fileName);
+         //if gotten to here there is a path selected
+         savePath(newFile);
       
          WritableImage image = currentJulia.getImage();
          File file = new File(newFile.getAbsolutePath());
@@ -94,14 +127,46 @@ public class Main extends Application {
       }
    }
 
-   private String getStorageDirec(){
-      Path currentRelativePath = Paths.get("");
-      String s = currentRelativePath.toAbsolutePath().toString();
-      return s + "\\images";
+
+   private String getSavedPath(){
+      //look at saveFilePath
+      String path;
+      try {
+         File myObj = new File(saveFilePath);
+         Scanner myReader = new Scanner(myObj);
+         path = myReader.nextLine();         
+         myReader.close();
+         if(new File(path).isDirectory()){
+            return path;
+         }
+         else{
+            return null;
+         }
+       } catch (FileNotFoundException e) {
+         //e.printStackTrace();
+         return null;
+       }
    }
 
-   private void showError(){
+   private String getStorageDirec(){
+      String savedPath = getSavedPath();
+      if(savedPath == null){
+         Path currentRelativePath = Paths.get("");
+         String s = currentRelativePath.toAbsolutePath().toString()+ "\\images";
+         return s;
+      }
+      else{
+         return savedPath;
+      }
+   }
+
+   private void showError(String errorMsg){
       errorText.setOpacity(1);
+      errorText.setText(errorMsg);
+   }
+
+   private void clearError(){
+      errorText.setOpacity(0);
    }
 
    private void makeFractal(Pane root){
@@ -110,11 +175,10 @@ public class Main extends Application {
       }
 
       new Thread(() -> {
-         Platform.runLater(()-> errorText.setOpacity(0));
+         Platform.runLater(()-> clearError());
          Platform.runLater(()-> loadingText.setOpacity(1));
          Platform.runLater(()-> setColour());
          busyLoading = true;
-         boolean wasError = false;
         try{
          double[] fVals = getFields();
 
@@ -145,21 +209,19 @@ public class Main extends Application {
          inpFields[XFORM].getText(), inpFields[YFORM].getText());
          }
          catch(Exception e){
-            //System.out.println(e);
-            wasError = true;
+            String message = e.getMessage();
+            Platform.runLater(()-> showError(message));
+            Platform.runLater(()-> loadingText.setOpacity(0));
+            busyLoading = false;
+            return;
          }
 
          Platform.runLater(()-> loadingText.setOpacity(0));
-         if(!wasError){
-            Platform.runLater(()-> setImage(currentJulia.getImage(), root, 400, 100));
-            Platform.runLater(()-> fracDone.play());
-         }
-         else{
-            Platform.runLater(()-> showError());
-         }
+         Platform.runLater(()-> setImage(currentJulia.getImage(), root, 400, 100));
+         Platform.runLater(()-> fracDone.play());
+         
          busyLoading = false;
      }).start();
-
      
    }
 
@@ -171,16 +233,20 @@ public class Main extends Application {
 
    private double[] getFields(){
       double[] doubleVals = new double[XFORM];
+      String jxl="";
+      try{
       for(int i = 0; i < XFORM; i++){
-         String jxl = inpFields[i].getText();
+         jxl = inpFields[i].getText();
             doubleVals[i] = Double.parseDouble(jxl);
       }
-      if(doubleVals[XMIN] >= doubleVals[XMAX] || doubleVals[YMIN] >= doubleVals[YMAX]){
-         throw new NumberFormatException();
+      }
+      catch(Exception e){
+         throw new NumberFormatException("'"+jxl+"' is not a number");
       }
 
-      //if(utils.isInt(inpFields[WIDTH].getText()))
-      //  doubleVals[WIDTH] = Double.parseDouble(inpFields[WIDTH].getText());
+      if(doubleVals[XMIN] >= doubleVals[XMAX] || doubleVals[YMIN] >= doubleVals[YMAX]){
+         throw new NumberFormatException("min values must be smaller than max values");
+      }
       return doubleVals;
    }
 
@@ -208,7 +274,7 @@ public class Main extends Application {
       }
       catch(Exception e){
          //System.out.println(e);
-         showError();return;
+         showError("a field you entered was invalid");return;
       }
       double shiftDist;
       if(direction%2==0){
@@ -256,7 +322,7 @@ public class Main extends Application {
          yMax = allVals[YMAX];
       }
       catch(Exception e){
-         showError();return;
+         showError("a field you entered was invalid");return;
       }
 
       zoomAmount = (((xMax-xMin) + (yMax-yMin))/2)*zoomFactor;
@@ -357,70 +423,74 @@ public class Main extends Application {
       int fromTop = 50;
       final int fromLeft = 20;
       final int fromLeftInset = fromLeft+20;
+      ObservableList<Node> rootChildren = root.getChildren();
 
       Button submit = makeFractalButton("create", 260, 250, root);
       submit.setTooltip(new Tooltip("or press enter"));
 
-      makeText("c value", defaultTextSize, fromLeft, fromTop, root);
+      makeText("c value", defaultTextSize, fromLeft, fromTop, rootChildren);
       makeTextBox(3, fromLeft+80, fromTop, root, "0.4", CVAL);
 
       fromTop += spacing;
-      makeText("expansion", defaultTextSize, fromLeft, fromTop, root);
+      makeText("expansion", defaultTextSize, fromLeft, fromTop, rootChildren);
       makeTextBox(3, fromLeft+100, fromTop, root, "1", EXPAN);
       
       fromTop += spacing;
-      makeText("darkness", defaultTextSize, fromLeft, fromTop, root);
+      makeText("darkness", defaultTextSize, fromLeft, fromTop, rootChildren);
 
       makeTextBox(3, fromLeft+90, fromTop, root, "40", DARK);
 
       fromTop += spacing;
-      makeText("colour preset", defaultTextSize, fromLeft, fromTop, root);
+      makeText("colour preset", defaultTextSize, fromLeft, fromTop, rootChildren);
       COLOUR = makeIntList(1, 8, fromLeft+130, fromTop, root);
 
       fromTop += spacing;
-      makeText("camera position", defaultTextSize, fromLeft, fromTop, root);
+      makeText("camera position", defaultTextSize, fromLeft, fromTop, rootChildren);
          fromTop += spacing;
-         makeText("x", defaultTextSize-1, fromLeftInset, fromTop, root);
+         makeText("x", defaultTextSize-1, fromLeftInset, fromTop, rootChildren);
 
             fromTop += spacing;
-            makeText("from", defaultTextSize-2, fromLeftInset+10, fromTop, root);
+            makeText("from", defaultTextSize-2, fromLeftInset+10, fromTop, rootChildren);
             makeTextBox(3, fromLeftInset+60, fromTop, root, "-2", XMIN);
-            makeText("to", defaultTextSize-2, fromLeftInset+115, fromTop, root);
+            makeText("to", defaultTextSize-2, fromLeftInset+115, fromTop, rootChildren);
             makeTextBox(3, fromLeftInset+145, fromTop, root, "2", XMAX);
       
 
          fromTop += spacing;
-         makeText("y", defaultTextSize-1, fromLeftInset, fromTop, root);
+         makeText("y", defaultTextSize-1, fromLeftInset, fromTop, rootChildren);
 
             fromTop += spacing;
-            makeText("from", defaultTextSize-2, fromLeftInset+10, fromTop, root);
+            makeText("from", defaultTextSize-2, fromLeftInset+10, fromTop, rootChildren);
             makeTextBox(3, fromLeftInset+60, fromTop, root, "-2", YMIN);
-            makeText("to", defaultTextSize-2, fromLeftInset+115, fromTop, root);
+            makeText("to", defaultTextSize-2, fromLeftInset+115, fromTop, rootChildren);
             makeTextBox(3, fromLeftInset+145, fromTop, root, "2", YMAX);
       
       fromTop += spacing+10;
-      makeText("image dimensions", defaultTextSize, fromLeft, fromTop, root);
+      makeText("image dimensions", defaultTextSize, fromLeft, fromTop, rootChildren);
          fromTop += spacing;
-         makeText("width", defaultTextSize-1, fromLeftInset, fromTop, root);
+         makeText("width", defaultTextSize-1, fromLeftInset, fromTop, rootChildren);
          makeTextBox(3, fromLeftInset+60, fromTop, root, "400", WIDTH);
 
          fromTop += spacing;
-         makeText("height", defaultTextSize-1, fromLeftInset, fromTop, root);
+         makeText("height", defaultTextSize-1, fromLeftInset, fromTop, rootChildren);
          makeTextBox(3, fromLeftInset+60, fromTop, root, "400", HEIGHT);
 
       fromTop += spacing + 20;
-      makeText("custom modifications on x and y", defaultTextSize, fromLeft, fromTop, root);
+      makeText("custom modifications on x and y", defaultTextSize, fromLeft, fromTop, rootChildren);
          fromTop += spacing;
-         makeText("x =", defaultTextSize, fromLeftInset, fromTop, root);
+         makeText("x =", defaultTextSize, fromLeftInset, fromTop, rootChildren);
          makeTextBox(15, fromLeft+60, fromTop, root, "x", XFORM);
 
          fromTop += spacing;
-         makeText("y =", defaultTextSize, fromLeftInset, fromTop, root);
+         makeText("y =", defaultTextSize, fromLeftInset, fromTop, rootChildren);
          makeTextBox(15, fromLeft+60, fromTop, root, "y", YFORM);
 
+      
+      makeHyperlink("new here? click me!", 20, 15, "help.html", root);
+
       fromTop += spacing+20;
-      String txt = "Valid symbols in custom functions are:\nnumbers, x, y, (, ), +, -, *, /, ^, cos, sin";
-      makeText(txt, defaultTextSize-4, fromLeft, fromTop, root);
+      String txt = "Valid symbols in custom functions are:\nnumbers, x, y, (, ), +, -, *, /, ^, cos(), sin()";
+      makeText(txt, defaultTextSize-4, fromLeft, fromTop, rootChildren);
 
       makeSaveButton("save", 320, 250, root, pStage);
 
@@ -435,16 +505,16 @@ public class Main extends Application {
 
       goHomeButton("reset", 290, 200, root);
 
-      loadingText = makeText("loading...", 35, 400, 20, root);
+      loadingText = makeText("loading...", 35, 400, 20, rootChildren);
       loadingText.setOpacity(0);
       loadingText.setFill(Color.LIMEGREEN);
 
-      errorText = makeText("oops, there was an error", 35, 400, 20, root);
-      errorText.setOpacity(0);
+      errorText = makeText("default", 35, 400, 20, rootChildren);
+      clearError();
       errorText.setFill(Color.RED);
 
 
-      Text finishedNotifier = makeText("fractal complete", 35, 400, 20, root);
+      Text finishedNotifier = makeText("fractal complete", 35, 400, 20, rootChildren);
       finishedNotifier.setOpacity(0);
       finishedNotifier.setFill(Color.BLUE); 
       fracDone = new FadeTransition(Duration.millis(1000), finishedNotifier);
@@ -452,6 +522,25 @@ public class Main extends Application {
       fracDone.setToValue(0);
        
       root.getChildren().add(submit);
+   }
+
+   private void makeHyperlink(String text, int xpos, int ypos, String linkedFile, Pane root){
+      Hyperlink myHyperlink = new Hyperlink();
+      myHyperlink.setText(text);
+      myHyperlink.relocate(xpos, ypos);
+      myHyperlink.setOnAction(e -> {
+            if(Desktop.isDesktopSupported())
+            {
+               try {
+                  Desktop.getDesktop().browse(new URI(linkedFile));
+               } catch (IOException e1) {
+                  e1.printStackTrace();
+               } catch (URISyntaxException e1) {
+                  e1.printStackTrace();
+               }
+            }
+      });
+      root.getChildren().add(myHyperlink);
    }
 
    private void makeTextBox(int length, int xpos, int ypos, Pane root, String init, int index){
@@ -462,11 +551,11 @@ public class Main extends Application {
       inpFields[index] = newField;
    }
 
-   public Text makeText(String text, int size, int xpos, int ypos, Pane root){
+   public Text makeText(String text, int size, int xpos, int ypos, ObservableList<Node> rootChildren){
       Text newText = new Text(text);
       newText.setFont(new Font(size));
       newText.relocate(xpos, ypos);
-      root.getChildren().add(newText);
+      rootChildren.add(newText);
       return newText;
    }
 

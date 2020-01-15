@@ -12,7 +12,7 @@ public class formula{
     private String[] postFix;
     private Node head=null;
     public Stack<Double> actionStack = new Stack<Double>();
-    public boolean noError = true;
+    //public boolean noError = true;
     
     /**
      * make linked list with each node a type depending on operation
@@ -22,13 +22,13 @@ public class formula{
 
 
     public formula(String str){
-        try{
+        //try{
             makePostfix(str);//note that this can throw some mad exceptions
             simulateEquation();
-        }
-        catch(Exception e){
-            noError = false;
-        }
+        //}
+        //catch(Exception e){
+         //   noError = false;
+        //}
     }
 
     private boolean isDualOperator(String str){

@@ -34,10 +34,21 @@ public class julia{
         this.yMin = yMin;
         this.yMax = yMax;
         
-        String trimmedX = xEq.replaceAll("\\s+","");
+        try{
+        String trimmedX = xEq.replaceAll("\\s+","").toLowerCase();
         this.xEq = new formula(trimmedX);
-        String trimmedY = yEq.replaceAll("\\s+","");
-        this.yEq = new formula(trimmedY);
+        }
+        catch(Exception e){
+            throw new NumberFormatException("'"+xEq+"' is not a valid equation");
+        }
+
+        try{
+            String trimmedY = yEq.replaceAll("\\s+","").toLowerCase();
+            this.yEq = new formula(trimmedY);
+        }
+        catch(Exception e){
+            throw new NumberFormatException("'"+yEq+"' is not a valid equation");
+        }
         image  = new WritableImage(width, height);
         makeFractal();
         //System.out.println(rangeScale(20, 0, 255, 5, 15));
