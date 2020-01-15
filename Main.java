@@ -210,6 +210,7 @@ public class Main extends Application {
          }
          catch(Exception e){
             String message = e.getMessage();
+            //utils.errorMsg("the message was "+message);
             Platform.runLater(()-> showError(message));
             Platform.runLater(()-> loadingText.setOpacity(0));
             busyLoading = false;
@@ -486,7 +487,7 @@ public class Main extends Application {
          makeTextBox(15, fromLeft+60, fromTop, root, "y", YFORM);
 
       
-      makeHyperlink("new here? click me!", 20, 15, "help.html", root);
+      makeHyperlink("new here? click me!", 20, 5, 20, "help.html", root);
 
       fromTop += spacing+20;
       String txt = "Valid symbols in custom functions are:\nnumbers, x, y, (, ), +, -, *, /, ^, cos(), sin()";
@@ -524,10 +525,11 @@ public class Main extends Application {
       root.getChildren().add(submit);
    }
 
-   private void makeHyperlink(String text, int xpos, int ypos, String linkedFile, Pane root){
+   private void makeHyperlink(String text, int xpos, int ypos, int size, String linkedFile, Pane root){
       Hyperlink myHyperlink = new Hyperlink();
       myHyperlink.setText(text);
       myHyperlink.relocate(xpos, ypos);
+      myHyperlink.setFont(new Font(size));
       myHyperlink.setOnAction(e -> {
             if(Desktop.isDesktopSupported())
             {

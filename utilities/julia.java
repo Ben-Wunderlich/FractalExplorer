@@ -1,5 +1,7 @@
 package utilities;
 
+import javax.naming.TimeLimitExceededException;
+
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
 
@@ -16,6 +18,7 @@ public class julia{
     double yMax;
     formula xEq;
     formula yEq;
+    final long maxTime = 10000;
 
 
     public static int colour=0;
@@ -23,7 +26,7 @@ public class julia{
 
 
     public julia(int width, int height, double c, double expand,double dark,
-    double xMin, double xMax, double yMin, double yMax, String xEq, String yEq){
+    double xMin, double xMax, double yMin, double yMax, String xEq, String yEq) throws TimeLimitExceededException{
         this.width = width;
         this.height = height;
         this.cVal = c;
@@ -50,7 +53,10 @@ public class julia{
             throw new NumberFormatException("'"+yEq+"' is not a valid equation");
         }
         image  = new WritableImage(width, height);
-        makeFractal();
+        boolean result = makeFractal();
+        if(result){//if was error
+            throw new TimeLimitExceededException("took too long");
+        }
         //System.out.println(rangeScale(20, 0, 255, 5, 15));
     }
 
@@ -58,12 +64,13 @@ public class julia{
         return image;
     }
 
-    private void makeFractal(){
+    private boolean makeFractal(){
         PixelWriter writer = image.getPixelWriter();
         //int[] arr = new arr[]
         double currX;
         double currY;
 
+        long startTime = System.currentTimeMillis();
         for(int i = 0; i<width; i++){
             currX = rangeScale((double)i, xMin, xMax, 0, (double)width);
             for(int j = 0; j< height; j++){
@@ -71,8 +78,11 @@ public class julia{
                 int[] pix = getPixel(currX,currY);
                 writer.setArgb(i, j, makeARGB(pix[0],pix[1],pix[2]));
             }
+            if(System.currentTimeMillis() - startTime > maxTime){
+                return true;
+            }
         }
-
+        return false;
     }
 
     private int makeARGB(int r, int g, int b){
@@ -86,6 +96,7 @@ public class julia{
         double yEqTemp;
 
         int i = 0;
+        try{
         while(keepIterating(i, x, y)){
             xTemp = squareNum(x) - squareNum(y);
             y = (2*x*y)+cVal;
@@ -99,6 +110,10 @@ public class julia{
             x *= expansion;
             y *= expansion;
             i++;
+        }
+        }
+        catch(Exception e){
+            throw new NumberFormatException("a formula you entered was invalid");
         }
         i = (int)rangeScale((double)i, 0, 255, 0, darkness);
         return colourify(i);
