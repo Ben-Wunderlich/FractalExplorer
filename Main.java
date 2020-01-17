@@ -440,7 +440,7 @@ public class Main extends Application {
       fromTop += spacing;
       makeText("darkness", defaultTextSize, fromLeft, fromTop, rootChildren);
 
-      makeTextBox(3, fromLeft+90, fromTop, root, "40", DARK);
+      makeTextBox(3, fromLeft+90, fromTop, root, "10", DARK);
 
       fromTop += spacing;
       makeText("colour preset", defaultTextSize, fromLeft, fromTop, rootChildren);

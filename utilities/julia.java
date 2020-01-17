@@ -140,8 +140,15 @@ public class julia{
         }
     }
 
+    private boolean withinShape(double x, double y){
+        //return (squareNum(x) + squareNum(y) < 4);//circle
+        boolean xValid = x < xMax && x > xMin;
+        boolean yValid = y < yMax && y > yMin;
+        return (xValid && yValid);
+    }
+
     private boolean keepIterating(int i, double x, double y){
-        if((i < darkness) && ((squareNum(x) + squareNum(y)) < 4)){
+        if((i < darkness) && withinShape(x, y)){
             return true;
         }
         return false;
