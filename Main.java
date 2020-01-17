@@ -34,7 +34,6 @@ import java.awt.Desktop;
 import java.net.URISyntaxException;
 import java.net.URI;
 import javafx.scene.Node;
-import java.io.FileNotFoundException;
 import java.util.Scanner;
 import java.io.FileWriter;
 
@@ -67,7 +66,6 @@ public class Main extends Application {
 
    boolean busyLoading = false;
 
-   int imgWidth = 400;
    julia currentJulia;
    ImageView lastImage = null;
 
@@ -258,7 +256,7 @@ public class Main extends Application {
     * 2 = down
     * 3 = left
     */
-   private void moveCamera(int direction){
+   private void moveCamera(int direction, Pane root){
       final double moveFactor = 0.3;
 
       double xMin;
@@ -300,13 +298,14 @@ public class Main extends Application {
             inpFields[XMAX].setText(String.valueOf(xMax-shiftDist));
          }
       }
+      makeFractal(root);
    }
 
    /**
     * 0 = zoom in
     * 1 = zoom out
     */
-   private void zoom(int direction){
+   private void zoom(int direction, Pane root){
       final double zoomFactor = 0.3;
       double zoomAmount;
 
@@ -328,18 +327,19 @@ public class Main extends Application {
 
       zoomAmount = (((xMax-xMin) + (yMax-yMin))/2)*zoomFactor;
 
-      if(direction == 0){//in
-         inpFields[XMIN].setText(String.valueOf(xMin+zoomAmount));
-         inpFields[XMAX].setText(String.valueOf(xMax-zoomAmount));
-         inpFields[YMIN].setText(String.valueOf(yMin+zoomAmount));
-         inpFields[YMAX].setText(String.valueOf(yMax-zoomAmount));
-      }
-      else{//out
+      if(direction == 1){//in
          inpFields[XMIN].setText(String.valueOf(xMin-zoomAmount));
          inpFields[XMAX].setText(String.valueOf(xMax+zoomAmount));
          inpFields[YMIN].setText(String.valueOf(yMin-zoomAmount));
          inpFields[YMAX].setText(String.valueOf(yMax+zoomAmount));
       }
+      else{//out
+         inpFields[XMIN].setText(String.valueOf(xMin+zoomAmount));
+         inpFields[XMAX].setText(String.valueOf(xMax-zoomAmount));
+         inpFields[YMIN].setText(String.valueOf(yMin+zoomAmount));
+         inpFields[YMAX].setText(String.valueOf(yMax-zoomAmount));
+      }
+      makeFractal(root);
    }
 
    private void goHome(Pane root){
@@ -359,20 +359,19 @@ public class Main extends Application {
     * 4 = zoom in
     * 5 = zoom out
     */
-   private void makeZoomButton(String text, int xpos, int ypos, Pane root, int what){
+   private void makeCameraPositionButton(String text, int xpos, int ypos, Pane root, int dir){
       Button newButt = new Button(text);
       newButt.relocate(xpos, ypos);
       double buttSize = 45;
-      if(what <=3){
+      if(dir <=3){
          newButt.setMinSize(buttSize, buttSize);
       }
 
       EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() { 
          public void handle(ActionEvent e) 
          {
-            if(what<=3){moveCamera(what);}
-            else{zoom(what-4);}
-            makeFractal(root);
+            if(dir<=3){moveCamera(dir, root);}
+            else{zoom(dir-4, root);}
          } 
       };
       newButt.addEventHandler(ActionEvent.ACTION,event);
@@ -428,6 +427,8 @@ public class Main extends Application {
 
       Button submit = makeFractalButton("create", 260, 250, root);
       submit.setTooltip(new Tooltip("or press enter"));
+
+      //need log(n) bits to represent n
 
       makeText("c value", defaultTextSize, fromLeft, fromTop, rootChildren);
       makeTextBox(3, fromLeft+80, fromTop, root, "0.4", CVAL);
@@ -496,13 +497,13 @@ public class Main extends Application {
       makeSaveButton("save", 320, 250, root, pStage);
 
       //field of view buttons
-      makeZoomButton("up", 295, 25, root, 0);
-      makeZoomButton("right", 340, 70, root, 1);
-      makeZoomButton("down", 295, 115, root, 2);
-      makeZoomButton("left", 250, 70, root, 3);
-
-      makeZoomButton("zoom in ", 250, 170, root, 4);
-      makeZoomButton("zoom out", 320, 170, root, 5);
+      makeCameraPositionButton("up", 295, 25, root, 0);
+      makeCameraPositionButton("right", 340, 70, root, 1);
+      makeCameraPositionButton("down", 295, 115, root, 2);
+      makeCameraPositionButton("left", 250, 70, root, 3);
+      //zooms
+      makeCameraPositionButton("zoom in ", 250, 170, root, 4);
+      makeCameraPositionButton("zoom out", 320, 170, root, 5);
 
       goHomeButton("reset", 290, 200, root);
 
@@ -587,8 +588,28 @@ public class Main extends Application {
       Scene scene = new Scene(sp ,1000, 600);
 
       scene.setOnKeyPressed(e -> {
-         if (e.getCode() == KeyCode.ENTER) {
+         KeyCode input = e.getCode();
+         //utils.errorMsg(input.toString());
+         if (input == KeyCode.ENTER) {
             makeFractal(root);
+         }
+         else if(input == KeyCode.EQUALS || input == KeyCode.NUMPAD5){
+            zoom(0, root);
+         }
+         else if(input == KeyCode.MINUS){
+            zoom(1, root);
+         }
+         else if(input == KeyCode.NUMPAD4){
+            moveCamera(3, root);
+         }
+         else if(input == KeyCode.NUMPAD8){
+            moveCamera(0, root);
+         }
+         else if(input == KeyCode.NUMPAD6){
+            moveCamera(1, root);
+         }
+         else if(input == KeyCode.NUMPAD2){
+            moveCamera(2, root);
          }
       });
 
