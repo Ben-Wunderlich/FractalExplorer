@@ -35,7 +35,8 @@ import java.net.URISyntaxException;
 import java.net.URI;
 import javafx.scene.Node;
 import java.util.Scanner;
-import java.io.FileWriter;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
 
 import javafx.collections.ObservableList;
 import javafx.scene.control.ComboBox;
@@ -56,7 +57,8 @@ public class Main extends Application {
    final int XFORM = 9;//these 2 always need to be last
    final int YFORM = 10;
 
-   final String saveFilePath = "utilities\\save.pathstorage";
+   final String saveFilePath = "storage\\save.pathstorage";
+   final String saveInfoPath = "storage\\imageInfo.txt";
    TextField[] inpFields = new TextField[YFORM+1];
 
    ComboBox<Integer> COLOUR;
@@ -77,18 +79,57 @@ public class Main extends Application {
       lastImage = viewer;
    }
 
+   private boolean ensureFileExists(String filePath){
+      File f = new File(filePath);
+      if(!f.exists()){
+         try{
+            f.createNewFile();
+         }
+         catch(IOException e){
+            return false;
+         }
+      }
+      return true;
+   }
+
    private void savePath(File fullFile){
-      //utils.errorMsg("path saved!");
       String fullPath = fullFile.getParentFile().getAbsolutePath();
+      if(!ensureFileExists(saveFilePath)){
+         showError("Please let me know if you see this");
+      }
       try{
-         FileWriter myWriter = new FileWriter(saveFilePath);
-         myWriter.write(fullPath);
-         myWriter.close();
+         Files.write(Paths.get(saveFilePath), fullPath.getBytes(), StandardOpenOption.WRITE);
       }
       catch(IOException e){
          return;
       }
       //System.out.println(fullPath);
+   }
+
+   private String makeFileInfo(String fileName){
+      final String nuTab = "    ";
+      String giantString = "\n\nFilename: "+fileName+"\n"+
+      nuTab+"c value: "+inpFields[CVAL].getText()+"\n"+
+      nuTab+"expansion: "+inpFields[EXPAN].getText()+"\n"+
+      nuTab+"darkness: "+inpFields[DARK].getText()+"\n"+
+      nuTab+"x from: "+inpFields[XMIN].getText()+" to "+inpFields[XMAX].getText()+"\n"+
+      nuTab+"y from: "+inpFields[YMIN].getText()+" to "+inpFields[YMAX].getText()+"\n"+
+      nuTab+"x formula: "+inpFields[XFORM].getText()+"\n"+
+      nuTab+"y formula: "+inpFields[YFORM].getText()+"\n";
+      return giantString;
+   }
+
+   private void saveImageData(File fullFile){
+      if(!ensureFileExists(saveInfoPath)){
+         showError("Please let me know if you see this");
+      }
+      try {
+         String appendThis = makeFileInfo(fullFile.getName());
+         Files.write(Paths.get(saveInfoPath), appendThis.getBytes(), StandardOpenOption.APPEND);
+     }catch (IOException e) {
+         showError("Please let me know if you see this");
+     }
+
    }
 
    private boolean imageToSave(){
@@ -115,6 +156,7 @@ public class Main extends Application {
          //utils.errorMsg(fileName);
          //if gotten to here there is a path selected
          savePath(newFile);
+         saveImageData(newFile);
       
          WritableImage image = currentJulia.getImage();
          File file = new File(newFile.getAbsolutePath());
