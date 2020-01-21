@@ -8,4 +8,4 @@ A project I made to make working with fractals easier and fun
 4. (optional) right click and make shortcut to drag elsewhere.
 
 ### example
-![example fractal](https://github.com/Ben-Wunderlich/FractalExplorer/blob/master/images/cmDftxjFomTNM5aRsSn8.png)
+![example fractal](https://github.com/Ben-Wunderlich/FractalExplorer/blob/master/images/example1.png)
