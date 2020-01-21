@@ -4,6 +4,7 @@ import javax.naming.TimeLimitExceededException;
 
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
+import java.lang.Math;
 
 public class julia{
     WritableImage image;
@@ -119,6 +120,15 @@ public class julia{
         return colourify(i);
     }
 
+    private int[] wackyNewColour(int i, boolean invert){
+        double start = Math.sin((double)i);
+        int a = (int)rangeScale(start, 0, 255, -1, 1);
+        if(invert){
+            return new int[]{0,255-a,255-a};
+        }
+        return new int[]{0,a,a};
+    }
+
     private int[] colourify(int i){
         switch(colour){
             case 1:
@@ -133,25 +143,22 @@ public class julia{
                 return new int[]{0,255-i,0};
             case 6:
                 return new int[]{i,i,0};
-            //case 7:
-               // return new int[]{0,0,0};  
+            case 7:
+                return wackyNewColour(i, false);
+            case 8:
+                return wackyNewColour(i, true); 
             default:
                 return new int[]{0,i,i};
         }
     }
 
-    private boolean withinShape(double x, double y){
+    private boolean withinBounds(double x, double y){
         //return (squareNum(x) + squareNum(y) < 4);//circle
-        boolean xValid = x < xMax && x > xMin;
-        boolean yValid = y < yMax && y > yMin;
-        return (xValid && yValid);
+        return (x < xMax && x > xMin) && (y < yMax && y > yMin);//field of view
     }
 
     private boolean keepIterating(int i, double x, double y){
-        if((i < darkness) && withinShape(x, y)){
-            return true;
-        }
-        return false;
+        return((i < darkness) && withinBounds(x, y));
     }
 
     private double squareNum(double num){

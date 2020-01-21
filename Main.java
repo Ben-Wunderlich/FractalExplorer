@@ -78,7 +78,7 @@ public class Main extends Application {
    }
 
    private void savePath(File fullFile){
-      utils.errorMsg("path saved!");
+      //utils.errorMsg("path saved!");
       String fullPath = fullFile.getParentFile().getAbsolutePath();
       try{
          FileWriter myWriter = new FileWriter(saveFilePath);
@@ -88,7 +88,7 @@ public class Main extends Application {
       catch(IOException e){
          return;
       }
-      System.out.println(fullPath);
+      //System.out.println(fullPath);
    }
 
    private boolean imageToSave(){
@@ -121,7 +121,7 @@ public class Main extends Application {
          RenderedImage renderedImage = SwingFXUtils.fromFXImage(image, null);
          ImageIO.write(renderedImage,"png",file);
       } catch (IOException e) {
-        utils.errorMsg("THINGS HAVE GONE WRONG");
+         showError("Something went wrong when trying to make the file, try restarting");
       }
    }
 
