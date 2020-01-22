@@ -36,3 +36,5 @@ utilities/save.pathstorage
 storage/imageInfo.txt
 
 storage/save.pathstorage
+
+*.jsmooth

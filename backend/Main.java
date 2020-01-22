@@ -192,7 +192,7 @@ public class Main extends Application {
       String savedPath = getSavedPath();
       if(savedPath == null){
          Path currentRelativePath = Paths.get("");
-         String s = currentRelativePath.toAbsolutePath().toString()+ "\\images";
+         String s = currentRelativePath.toAbsolutePath().getParent().toString()+ "\\images";
          return s;
       }
       else{
