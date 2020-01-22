@@ -95,7 +95,7 @@ public class Main extends Application {
    private void savePath(File fullFile){
       String fullPath = fullFile.getParentFile().getAbsolutePath();
       if(!ensureFileExists(saveFilePath)){
-         showError("Please let me know if you see this");
+         showError("the exe file must be in the original folder");
       }
       try{
          Files.write(Paths.get(saveFilePath), fullPath.getBytes(), StandardOpenOption.WRITE);
@@ -121,13 +121,13 @@ public class Main extends Application {
 
    private void saveImageData(File fullFile){
       if(!ensureFileExists(saveInfoPath)){
-         showError("Please let me know if you see this");
+         showError("the exe file must be in the original folder");
       }
       try {
          String appendThis = makeFileInfo(fullFile.getName());
          Files.write(Paths.get(saveInfoPath), appendThis.getBytes(), StandardOpenOption.APPEND);
      }catch (IOException e) {
-         showError("Please let me know if you see this");
+         showError("the exe file must be in the original folder");
      }
 
    }
