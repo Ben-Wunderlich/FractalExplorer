@@ -40,3 +40,7 @@ storage/save.pathstorage
 *.jsmooth
 
 backend/storage/imageInfo.txt
+
+.vscode/
+
+backend/storage/save.pathstorage
