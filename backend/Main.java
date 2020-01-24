@@ -37,6 +37,9 @@ import javafx.scene.Node;
 import java.util.Scanner;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
+import java.time.format.DateTimeFormatter;  
+import java.time.LocalDateTime;
+import java.io.PrintWriter;
 
 import javafx.collections.ObservableList;
 import javafx.scene.control.ComboBox;
@@ -98,17 +101,23 @@ public class Main extends Application {
          showError("the exe file must be in the original folder");
       }
       try{
+         PrintWriter pw = new PrintWriter(saveFilePath);//clears the file
+         pw.close();
          Files.write(Paths.get(saveFilePath), fullPath.getBytes(), StandardOpenOption.WRITE);
       }
       catch(IOException e){
+         //System.out.println("path not saved"+e);
          return;
       }
       //System.out.println(fullPath);
    }
 
    private String makeFileInfo(String fileName){
+      DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm");  
+      LocalDateTime now = LocalDateTime.now(); 
       final String nuTab = "    ";
       String giantString = "\n\nFilename: "+fileName+"\n"+
+      nuTab+"made on: "+dtf.format(now)+"\n"+
       nuTab+"c value: "+inpFields[CVAL].getText()+"\n"+
       nuTab+"expansion: "+inpFields[EXPAN].getText()+"\n"+
       nuTab+"darkness: "+inpFields[DARK].getText()+"\n"+
@@ -122,6 +131,7 @@ public class Main extends Application {
    private void saveImageData(File fullFile){
       if(!ensureFileExists(saveInfoPath)){
          showError("the exe file must be in the original folder");
+         utils.errorMsg("hey");
       }
       try {
          String appendThis = makeFileInfo(fullFile.getName());
@@ -183,7 +193,6 @@ public class Main extends Application {
             return null;
          }
        } catch (Exception e) {
-         //e.printStackTrace();
          return null;
        }
    }
@@ -470,8 +479,6 @@ public class Main extends Application {
       Button submit = makeFractalButton("create", 260, 250, root);
       submit.setTooltip(new Tooltip("or press enter"));
 
-      //need log(n) bits to represent n
-
       makeText("c value", defaultTextSize, fromLeft, fromTop, rootChildren);
       makeTextBox(3, fromLeft+80, fromTop, root, "0.4", CVAL);
 
@@ -482,7 +489,7 @@ public class Main extends Application {
       fromTop += spacing;
       makeText("darkness", defaultTextSize, fromLeft, fromTop, rootChildren);
 
-      makeTextBox(3, fromLeft+90, fromTop, root, "10", DARK);
+      makeTextBox(3, fromLeft+90, fromTop, root, "20", DARK);
 
       fromTop += spacing;
       makeText("colour preset", defaultTextSize, fromLeft, fromTop, rootChildren);
