@@ -23,12 +23,45 @@ public class formula{
 
     public formula(String str){
         //try{
+            str = fixSigns(str);
             makePostfix(str);//note that this can throw some mad exceptions
             simulateEquation();
         //}
         //catch(Exception e){
          //   noError = false;
         //}
+    }
+
+    private boolean isPartner(char str){
+        if(isNumber(String.valueOf(str))){
+            return true;
+        }
+        switch(str){
+            case '.':
+            case ')':
+            case 'x':
+            case 'y':
+                return true;
+            default:
+                return false;
+
+        }
+    }
+
+    private String fixSigns(String str){
+        StringBuilder fixedStr = new StringBuilder();
+        for(int i=0; i<str.length(); i++){
+            char leonard = str.charAt(i);
+            switch(leonard){
+                case '-':
+                case '+':
+                    if(i == 0 || !isPartner(str.charAt(i-1))){
+                        fixedStr.append("0");//turns -x into 0-x
+                    }
+            }
+            fixedStr.append(leonard);
+        }
+        return fixedStr.toString();
     }
 
     private boolean isDualOperator(String str){

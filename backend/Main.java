@@ -642,10 +642,10 @@ public class Main extends Application {
          if (input == KeyCode.ENTER) {
             makeFractal(root);
          }
-         else if(input == KeyCode.EQUALS || input == KeyCode.NUMPAD5){
+         else if(input == KeyCode.ADD || input == KeyCode.NUMPAD5){
             zoom(0, root);
          }
-         else if(input == KeyCode.MINUS){
+         else if(input == KeyCode.SUBTRACT){
             zoom(1, root);
          }
          else if(input == KeyCode.NUMPAD4){
