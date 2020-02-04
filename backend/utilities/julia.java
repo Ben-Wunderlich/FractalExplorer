@@ -124,9 +124,9 @@ public class julia{
         double start = Math.sin((double)i);
         int a = (int)rangeScale(start, 0, 255, -1, 1);
         if(invert){
-            return new int[]{0,255-a,255-a};
+            return new int[]{255-a,255-a,255-a};
         }
-        return new int[]{0,a,a};
+        return new int[]{a,a,a};
     }
 
     private int[] colourify(int i){
