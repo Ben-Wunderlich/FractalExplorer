@@ -129,6 +129,33 @@ public class julia{
         return new int[]{a,a,a};
     }
 
+    private int[] heatMap(int i){
+        if(i==255){
+            return new int[]{0,0,0};
+        }
+        int red = (int)Math.log(i*i);
+        red = (int)rangeScale(red, 0, 255, 0, 11);
+
+        int blue = i*i;
+        blue = (int)rangeScale(blue, 0, 255, 0, 65025);
+
+        return new int[]{red, blue, 0};
+        /*if(i < 254){
+            return new int[]{i, i, 0};
+        }*/
+    }
+
+    private int[] rainbow(int i){
+        if(i==255){
+           return new int[]{0,0,0};
+        }
+
+        double tempI = Math.log(i*i*i);
+        i = 255-(int)rangeScale(tempI, 0, 255, 0, 16.6);
+
+        return new int[]{i, i, i}; 
+    }
+
     private int[] colourify(int i){
         switch(colour){
             case 1:
@@ -146,7 +173,11 @@ public class julia{
             case 7:
                 return wackyNewColour(i, false);
             case 8:
-                return wackyNewColour(i, true); 
+                return wackyNewColour(i, true);
+            case 9:
+                return heatMap(i);
+            case 10:
+                return rainbow(i);
             default:
                 return new int[]{0,i,i};
         }

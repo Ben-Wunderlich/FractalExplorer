@@ -493,7 +493,7 @@ public class Main extends Application {
 
       fromTop += spacing;
       makeText("colour preset", defaultTextSize, fromLeft, fromTop, rootChildren);
-      COLOUR = makeIntList(1, 8, fromLeft+130, fromTop, root);
+      COLOUR = makeIntList(1, 10, fromLeft+130, fromTop, root);
 
       fromTop += spacing;
       makeText("camera position", defaultTextSize, fromLeft, fromTop, rootChildren);
@@ -630,11 +630,14 @@ public class Main extends Application {
    @Override     
    public void start(Stage primaryStage) throws Exception {            
       Pane root = new Pane();
+      //root.setStyle("-fx-background-color:PINK;");
       initWindow(root, primaryStage);
 
       ScrollPane sp = new ScrollPane();
       sp.setContent(root);
       Scene scene = new Scene(sp ,1000, 600);
+      //scene.setFill();
+ //     scene.fillProperty().set(Color.ALICEBLUE);
 
       scene.setOnKeyPressed(e -> {
          KeyCode input = e.getCode();
