@@ -20,7 +20,7 @@ public class julia{
     formula xEq;
     formula yEq;
     final long maxTime = 10000;
-
+    private final int bigDark = 50;
 
     public static int colour=0;
 
@@ -98,7 +98,7 @@ public class julia{
 
         int i = 0;
         try{
-        while(keepIterating(i, x, y)){
+        while(i==0 || keepIterating(i, x, y)){
             xTemp = squareNum(x) - squareNum(y);
             y = (2*x*y)+cVal;
             x = xTemp + cVal;
@@ -185,7 +185,8 @@ public class julia{
 
     private boolean withinBounds(double x, double y){
         //return (squareNum(x) + squareNum(y) < 4);//circle
-        return (x < xMax && x > xMin) && (y < yMax && y > yMin);//field of view
+        //return (x < xMax && x > xMin) && (y < yMax && y > yMin);//field of view, stupid me
+        return (x < bigDark && x > -bigDark) && (y < bigDark && y > -bigDark);//enlightened version
     }
 
     private boolean keepIterating(int i, double x, double y){
